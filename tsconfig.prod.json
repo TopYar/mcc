@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "./config/**",
+    "./public/**",
+    "./dist/**",
+    "./migrations/**",
+    "./index.js"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "ignorePatterns": [
+    "/dist/**",
+    "/config/**",
+    "/migrations/**"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "tsconfig.json",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint/eslint-plugin",
+    "simple-import-sort"
+  ],
+  "env": {
+    "commonjs": true,
+    "es2021": true,
+    "jest": true,
+    "node": true
+  },
+  "globals": {
+    "com": true
+  },
+  "extends": [
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+//    "sort-imports": [2],
+    "curly": [2, "all"], // все что должно быть в фигурных скобках - должно быть в фигурных скобках
+    "@typescript-eslint/brace-style": [2],
+    "@typescript-eslint/indent": [2], // отступы
+    "@typescript-eslint/keyword-spacing": [2], // постоянные отступы во всяких if else и тд
+    "@typescript-eslint/no-throw-literal": [2], // запрыт на throw чего угодно кроме ошибки
+    "@typescript-eslint/no-unused-vars": [1], // варнинг на ннеиспользуемые переменные
+    "@typescript-eslint/object-curly-spacing": [2, "always"], // отступы внутри фигурныхскобок
+    "@typescript-eslint/padding-line-between-statements": [ // отступы после обьявления переменных
+      "error",
+      { "blankLine": "always", "prev": ["const", "let", "var"], "next": "*"},
+      { "blankLine": "any",    "prev": ["const", "let", "var"], "next": ["const", "let", "var"]},
+      { "blankLine": "always", "prev": "*", "next": "return" },
+      { "blankLine": "always", "prev": "directive", "next": "*" },
+      { "blankLine": "always", "prev": "*", "next": ["if", "switch", "while"] }
+    ],
+    "@typescript-eslint/quotes": ["error", "single", { "allowTemplateLiterals": true }], // ковычки одинарные, можно литералы
+    "@typescript-eslint/return-await": [2, "in-try-catch"], // return await можно только в try/catch
+    "@typescript-eslint/space-before-function-paren": [2, "always"], // пробелы в функция
+    "@typescript-eslint/space-infix-ops": 1,
+    "@typescript-eslint/no-explicit-any": "off", // запрет использования типа any
+    "@typescript-eslint/semi": [ // точка с запятой
+      "error",
+      "always"
+    ],
+    "no-unused-vars": "off",
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ],
+    "arrow-spacing": 2,
+    "no-var": 2
+  }
+}
