@@ -1,5 +1,5 @@
 FROM node:19.6.1
 
-RUN npm -i \
-    npm run build2 \
-    npm run start:prod
+RUN ["CMD", "npm -i"]
+RUN ["CMD", "npm run build2"]
+RUN ["CMD", "npm run start:prod"]
