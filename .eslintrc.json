@@ -11,7 +11,8 @@
   },
   "plugins": [
     "@typescript-eslint/eslint-plugin",
-    "simple-import-sort"
+    "simple-import-sort",
+    "typescript-formatter"
   ],
   "env": {
     "commonjs": true,
@@ -27,14 +28,51 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
+    "typescript-formatter/format": [
+      "warn",
+      {
+        "baseIndentSize": 0,
+        "indentSize": 4,
+        "tabSize": 4,
+        "newLineCharacter": "\n",
+        "convertTabsToSpaces": true,
+        "indentStyle": 4,
+        "trimTrailingWhitespace": true,
+        "insertSpaceAfterCommaDelimiter": true,
+        "insertSpaceAfterSemicolonInForStatements": true,
+        "insertSpaceBeforeAndAfterBinaryOperators": true,
+        "insertSpaceAfterConstructor": false,
+        "insertSpaceAfterKeywordsInControlFlowStatements": true,
+        "insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+        "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
+        "insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": false,
+        "insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+        "insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
+        "insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": false,
+        "insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": false,
+        "insertSpaceAfterTypeAssertion": false,
+        "insertSpaceBeforeFunctionParenthesis": false,
+        "placeOpenBraceOnNewLineForFunctions": false,
+        "placeOpenBraceOnNewLineForControlBlocks": false,
+        "insertSpaceBeforeTypeAnnotation": false,
+        "indentMultiLineObjectLiteralBeginningOnBlankLine": false,
+        "semicolons": "insert"
+      }
+    ],
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
 //    "sort-imports": [2],
     "curly": [2, "all"], // все что должно быть в фигурных скобках - должно быть в фигурных скобках
     "@typescript-eslint/brace-style": [2],
-    "@typescript-eslint/indent": [2], // отступы
+//    "@typescript-eslint/indent": ["error", 4, {
+//      "ignoredNodes": [
+//        "FunctionExpression > .params[decorators.length > 0]",
+//        "FunctionExpression > .params > :matches(Decorator, :not(:first-child))",
+//        "ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
+//      ]
+//    }], // отступы
     "@typescript-eslint/keyword-spacing": [2], // постоянные отступы во всяких if else и тд
-    "@typescript-eslint/no-throw-literal": [2], // запрыт на throw чего угодно кроме ошибки
+    "@typescript-eslint/no-throw-literal": [2], // запрет на throw чего угодно кроме ошибки
     "@typescript-eslint/no-unused-vars": [1], // варнинг на ннеиспользуемые переменные
     "@typescript-eslint/object-curly-spacing": [2, "always"], // отступы внутри фигурныхскобок
     "@typescript-eslint/padding-line-between-statements": [ // отступы после обьявления переменных
@@ -47,7 +85,6 @@
     ],
     "@typescript-eslint/quotes": ["error", "single", { "allowTemplateLiterals": true }], // ковычки одинарные, можно литералы
     "@typescript-eslint/return-await": [2, "in-try-catch"], // return await можно только в try/catch
-    "@typescript-eslint/space-before-function-paren": [2, "always"], // пробелы в функция
     "@typescript-eslint/space-infix-ops": 1,
     "@typescript-eslint/no-explicit-any": "off", // запрет использования типа any
     "@typescript-eslint/semi": [ // точка с запятой
