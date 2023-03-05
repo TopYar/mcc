@@ -13,5 +13,5 @@ COPY --from=appbuild /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=appbuild /usr/src/app/package.json /usr/src/app/package.json
 EXPOSE ${PORT}
 RUN npm install pm2 -g
-RUN #pm2 start npm -- start:prod
-CMD ["pm2", "start npm -- start:prod"]
+#RUN pm2 start npm -- start:prod
+#CMD ["pm2", "start npm -- start:prod"]
