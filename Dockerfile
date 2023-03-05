@@ -11,6 +11,5 @@ WORKDIR /usr/src/app
 COPY --from=appbuild /usr/src/app/dist /usr/src/app/dist
 COPY --from=appbuild /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=appbuild /usr/src/app/package.json /usr/src/app/package.json
-RUN npm install pm2 -g
-RUN pm2 start npm -- start:prod
+RUN npm run start:prod
 EXPOSE ${PORT}
