@@ -11,7 +11,7 @@ WORKDIR /usr/src/app
 COPY --from=appbuild /usr/src/app/dist /usr/src/app/dist
 COPY --from=appbuild /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=appbuild /usr/src/app/package.json /usr/src/app/package.json
-ENV PORT="${PORT}"
+ENV PORT=${PORT}
 EXPOSE ${PORT}
 RUN npm install pm2 -g
 #RUN pm2 start npm -- start:prod
