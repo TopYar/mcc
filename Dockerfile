@@ -11,5 +11,5 @@ WORKDIR /usr/src/app
 COPY --from=appbuild /usr/src/app/dist /usr/src/app/dist
 COPY --from=appbuild /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=appbuild /usr/src/app/package.json /usr/src/app/package.json
-RUN npm run start:prod
 EXPOSE ${PORT}
+CMD ["npm", "run start:prod"]
