@@ -1,4 +1,4 @@
-FROM node:19-alpine3.16 AS appbuild
+FROM node:19.7-slim AS appbuild
 WORKDIR /usr/src/app
 COPY package.json ./
 RUN npm i
@@ -6,7 +6,7 @@ COPY . ./
 RUN npm run build2
 
 
-FROM node:19.6.1
+FROM node:19.7-slim
 WORKDIR /usr/src/app
 COPY --from=appbuild /usr/src/app/dist /usr/src/app/dist
 COPY --from=appbuild /usr/src/app/node_modules /usr/src/app/node_modules
@@ -36,7 +36,6 @@ ENV MCC_MAIL_HOST=${MCC_MAIL_HOST}
 ENV MCC_MAIL_PORT=${MCC_MAIL_PORT}
 ENV MCC_MAIL_NAME=${MCC_MAIL_NAME}
 EXPOSE ${MCC_PORT}
-RUN apt-get install musl-dev
 RUN npm install pm2 -g
 #RUN pm2 start npm -- start:prod
 #CMD ["pm2", "start npm -- start:prod"]
