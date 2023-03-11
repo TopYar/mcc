@@ -36,6 +36,7 @@ ENV MCC_MAIL_HOST=${MCC_MAIL_HOST}
 ENV MCC_MAIL_PORT=${MCC_MAIL_PORT}
 ENV MCC_MAIL_NAME=${MCC_MAIL_NAME}
 EXPOSE ${MCC_PORT}
+RUN apk add --no-cache libc6-compat
 RUN npm install pm2 -g
 #RUN pm2 start npm -- start:prod
 #CMD ["pm2", "start npm -- start:prod"]
