@@ -1,4 +1,4 @@
-FROM node:19.7-slim AS appbuild
+FROM node:19.6.1 AS appbuild
 WORKDIR /usr/src/app
 COPY package.json ./
 RUN npm i
