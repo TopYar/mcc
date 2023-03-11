@@ -4,7 +4,6 @@
     "./config/**",
     "./public/**",
     "./dist/**",
-    "./migrations/**",
     "./index.js"
   ]
 }

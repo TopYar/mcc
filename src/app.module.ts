@@ -1,22 +1,34 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import configuration from './config/configuration';
+import { ContextMiddleware } from './common/middlewares/context.middleware';
+import { JwtSessionMiddleware } from './common/middlewares/jwt-session.middleware';
+import config from './config';
+import { ormconfig } from './database/ormconfig';
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { UsersService } from './modules/users/users.service';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            expandVariables: true,
-            load: [configuration],
+        TypeOrmModule.forRoot({
+            ...ormconfig,
+        }),
+        JwtModule.register({
+            secret: config.server.jwtSecret,
         }),
         UsersModule,
+        AuthModule,
     ],
     controllers: [AppController],
     providers: [AppService, UsersService],
 })
-export class AppModule {}
+export class AppModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(ContextMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
+        consumer.apply(JwtSessionMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
+    }
+}

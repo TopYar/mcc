@@ -1,0 +1,1 @@
+export type ExtendedAwaited<T extends (...args: any) => any> = Awaited<ReturnType<T>> | Error;

@@ -118,8 +118,6 @@
   "exclude": [
     "./public/**",
     "./dist/**",
-    "./migrations/**",
-    "./src/backend/old-graphql-schemas/**",
     "./index.js"
   ]
 }

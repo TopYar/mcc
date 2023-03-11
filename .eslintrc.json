@@ -1,8 +1,7 @@
 {
   "ignorePatterns": [
     "/dist/**",
-    "/config/**",
-    "/migrations/**"
+    "/config/**"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -87,6 +86,7 @@
     "@typescript-eslint/return-await": [2, "in-try-catch"], // return await можно только в try/catch
     "@typescript-eslint/space-infix-ops": 1,
     "@typescript-eslint/no-explicit-any": "off", // запрет использования типа any
+    "@typescript-eslint/no-non-null-assertion": "off", // запрет использования типа any
     "@typescript-eslint/semi": [ // точка с запятой
       "error",
       "always"
