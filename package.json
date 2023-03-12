@@ -16,6 +16,7 @@
     "migrations:create": "typeorm-ts-node-esm migration:create src/database/migrations/${npm_config_name}",
     "migrations:generate": "typeorm-ts-node-esm migration:generate -d src/database/ormconfig.ts src/database/migrations/${npm_config_name}",
     "migrations:run": "typeorm-ts-node-esm migration:run -d src/database/ormconfig.ts",
+    "migrations:run:prod": "typeorm migration:run -d dist/src/database/ormconfig.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
