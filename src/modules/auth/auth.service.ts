@@ -116,7 +116,7 @@ export class AuthService {
 
     async setPassword(id: string, password: string) {
         const key = `${config.server.recoverLinkPrefix}${id}`;
-        const userId = await redisClient.GETDEL(key);
+        const userId: string | null = await redisClient.GETDEL(key);
 
         if (!userId) {
             return ServiceResponse.fail(ServiceResponse.CODES.ERROR_RECOVER_LINK_IS_EXPIRED);
@@ -139,7 +139,7 @@ export class AuthService {
 
     async getRecoverInfo(id: string) {
         const key = `${config.server.recoverLinkPrefix}${id}`;
-        const userId = await redisClient.GET(key);
+        const userId: string | null = await redisClient.GET(key);
 
         if (!userId) {
             return ServiceResponse.fail(ServiceResponse.CODES.ERROR_RECOVER_LINK_IS_EXPIRED);
