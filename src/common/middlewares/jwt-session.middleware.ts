@@ -2,6 +2,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NextFunction, Request, Response } from 'express';
 import { Session } from 'express-session';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
 import { aesDecrypt } from '../../utils/cryptox';
 import { IJwtPayload } from '../helpers/jwt';
@@ -76,7 +77,9 @@ export class JwtSessionMiddleware implements NestMiddleware {
                 next();
             }
         } catch (error: any) {
-            if (error.name === 'JsonWebTokenError') {
+            if (error instanceof TokenExpiredError) {
+                return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_EXPIRED));
+            } else if (error instanceof JsonWebTokenError) {
                 return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_INVALID));
             }
 

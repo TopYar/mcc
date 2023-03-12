@@ -83,6 +83,22 @@ const CODES = {
         code: 2007,
         msg: 'Fail to confirm user email',
     },
+    FAIL_CREATE_RECOVER_LINK: {
+        code: 2008,
+        msg: 'Fail to create recover link',
+    },
+    FAIL_USE_RECOVER_LINK: {
+        code: 2009,
+        msg: 'Fail to process recover link',
+    },
+    FAIL_GET_RECOVER_LINK: {
+        code: 2010,
+        msg: 'Fail to process recover link',
+    },
+    ERROR_HTML_TEMPLATE_NOT_FOUND: {
+        code: 2011,
+        msg: 'Page not found',
+    },
 
 
 
@@ -94,17 +110,29 @@ const CODES = {
         code: 3001,
         msg: 'Invalid jwt token',
     },
-    ERROR_INVALID_CREDENTIALS: {
+    ERROR_JWT_TOKEN_IS_EXPIRED: {
         code: 3002,
+        msg: 'Jwt token is expired',
+    },
+    ERROR_INVALID_CREDENTIALS: {
+        code: 3003,
         msg: 'Provided credentials are invalid',
     },
+    ERROR_EMAIL_IS_NOT_CONFIRMED: {
+        code: 3004,
+        msg: 'Email is not confirmed',
+    },
     ERROR_SESSION_IS_INVALID: {
-        code: 3003,
+        code: 3005,
         msg: 'Session in jwt is not found',
     },
     ERROR_CONFIRMATION_CODE_IS_INVALID: {
-        code: 3004,
+        code: 3006,
         msg: 'Confirmation code is invalid',
+    },
+    ERROR_RECOVER_LINK_IS_EXPIRED: {
+        code: 3007,
+        msg: 'Recover link is expired',
     },
     ERROR_USER_ALREADY_EXISTS: {
         code: 3100,

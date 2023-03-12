@@ -2,12 +2,14 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 export default {
     project: process.env.MCC_PROJECT_NAME,
+    baseUrl: process.env.MCC_BASE_URL,
     server: {
         port: process.env.MCC_PORT || 3000,
         salt: process.env.MCC_HASH_SALT,
         sessionKey: process.env.MCC_SESSION_KEY,
         sessionPrefix: process.env.MCC_PROJECT_NAME + ':' + process.env.MCC_SESSION_PREFIX + ':',
         confirmationPrefix: process.env.MCC_PROJECT_NAME + ':' + process.env.MCC_CONFIRMATION_PREFIX + ':',
+        recoverLinkPrefix: process.env.MCC_PROJECT_NAME + ':' + process.env.MCC_RECOVER_LINK_PREFIX + ':',
         sessionExpire: process.env.MCC_SESSION_EXPIRE, // in days
         jwtSecret: process.env.MCC_JWT_SECRET,
         jwt: {

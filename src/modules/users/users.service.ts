@@ -66,8 +66,16 @@ export class UsersService {
 
         return ServiceResponse.ok(user);
     }
-    getByEmail({ email, attributes }: IUserGetByEmail) {
-        return this.usersRepository.getByEmail({ email, attributes });
+    async getByEmail({ email, attributes }: IUserGetByEmail) {
+        const user = await SafeCall.call<typeof this.usersRepository.getByEmail>(
+            this.usersRepository.getByEmail({ email, attributes }),
+        );
+
+        if (user instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
+        }
+
+        return ServiceResponse.ok(user);
     }
 
     async updateUser({ id, name, password, confirmedAt }: IUpdateUserParams): Promise<TResult<User>> {

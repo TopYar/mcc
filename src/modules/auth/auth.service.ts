@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import randomstring from 'randomstring';
+import { v4 as UUID } from 'uuid';
 
 import { EmailTemplate } from '../../common/helpers/email-templates';
 import { redisClient } from '../../common/redis';
@@ -42,7 +43,6 @@ export class AuthService {
         return ServiceResponse.ok(registerResponse.result);
     }
 
-
     async resendCode(id: string) {
         const userResponse = await SafeCall.call<typeof this.usersService.getOne>(
             this.usersService.getOne({ id, attributes: ['id', 'email'] }),
@@ -68,29 +68,96 @@ export class AuthService {
     }
 
     async login({ email, password }: LoginDto): Promise<TResult<User>> {
-        const user = await SafeCall.call<typeof this.usersService.getByEmail>(
+        const userResponse = await SafeCall.call<typeof this.usersService.getByEmail>(
             this.usersService.getByEmail({ email, attributes: ['id', 'password', 'confirmedAt'] }),
         );
 
-        if (user instanceof Error) {
+        if (userResponse instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
         }
 
-        if (!user) {
+        if (!userResponse) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_USER_NOT_FOUND);
         }
 
-        const correctCredentials = await user.comparePassword(password);
+        const userInstance = userResponse.result;
+
+        const correctCredentials = await userInstance.comparePassword(password);
 
         if (!correctCredentials) {
             return ServiceResponse.fail(ServiceResponse.CODES.ERROR_INVALID_CREDENTIALS);
         }
 
-        if (!user.confirmedAt) {
-            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_INVALID_CREDENTIALS);
+        if (!userInstance.confirmedAt) {
+            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_EMAIL_IS_NOT_CONFIRMED);
         }
 
-        return ServiceResponse.ok({ id: user.id });
+        return ServiceResponse.ok({ id: userInstance.id });
+    }
+
+
+    async recoverPassword(email: string) {
+        const userResponse = await SafeCall.call<typeof this.usersService.getByEmail>(
+            this.usersService.getByEmail({ email, attributes: ['id', 'email'] }),
+        );
+
+        if (userResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
+        }
+
+        if (!userResponse.success) {
+            return userResponse;
+        }
+
+        const userInstance = userResponse.result;
+
+        return this.sendRecoverLink(userInstance.id, userInstance.email);
+    }
+
+    async setPassword(id: string, password: string) {
+        const key = `${config.server.recoverLinkPrefix}${id}`;
+        const userId = await redisClient.GETDEL(key);
+
+        if (!userId) {
+            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_RECOVER_LINK_IS_EXPIRED);
+        }
+
+        const userResponse = await SafeCall.call<typeof this.usersService.updateUser>(
+            this.usersService.updateUser({ id: userId, password }),
+        );
+
+        if (userResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_UPDATE_USER);
+        }
+
+        if (!userResponse.success) {
+            return userResponse;
+        }
+
+        return ServiceResponse.ok();
+    }
+
+    async getRecoverInfo(id: string) {
+        const key = `${config.server.recoverLinkPrefix}${id}`;
+        const userId = await redisClient.GET(key);
+
+        if (!userId) {
+            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_RECOVER_LINK_IS_EXPIRED);
+        }
+
+        const userResponse = await SafeCall.call<typeof this.usersService.getOne>(
+            this.usersService.getOne({ id: userId, attributes: ['id', 'email'] }),
+        );
+
+        if (userResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
+        }
+
+        if (!userResponse.success) {
+            return userResponse;
+        }
+
+        return ServiceResponse.ok(userResponse.result.email);
     }
 
     private async sendCode(userId: string, email: string) {
@@ -110,6 +177,33 @@ export class AuthService {
                 subject: 'Complete registration',
                 params: {
                     code,
+                },
+            }),
+        );
+
+        if (emailResponse instanceof Error) {
+            console.error(emailResponse);
+
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_SEND_MAIL);
+        }
+
+        return ServiceResponse.ok();
+    }
+
+    private async sendRecoverLink(userId: string, email: string) {
+        const linkId = UUID();
+        const key = `${config.server.recoverLinkPrefix}${linkId}`;
+
+        await redisClient.SET(key, userId);
+        await redisClient.EXPIRE(key, 15 * 60); // 15 min
+
+        const emailResponse = await SafeCall.call<typeof this.emailService.send>(
+            this.emailService.send({
+                email: email,
+                template: EmailTemplate.RECOVER,
+                subject: 'Recover your password',
+                params: {
+                    link: config.baseUrl + `/auth/recover/${linkId}`,
                 },
             }),
         );

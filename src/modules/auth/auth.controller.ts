@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import ejs from 'ejs';
 import { Request } from 'express';
 import { Session } from 'express-session';
 import moment from 'moment';
 
+import { HtmlPage } from '../../common/decorators/html-template.decorator';
+import { HtmlTemplate } from '../../common/helpers/html-templates';
 import { EJwtType } from '../../common/helpers/jwt';
 import { redisClient } from '../../common/redis';
 // import { Session } from 'express-session';
@@ -15,7 +18,9 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { ConfirmDto } from './dto/confirm.dto';
 import { LoginDto } from './dto/login.dto';
+import { RecoverDto } from './dto/recover.dto';
 import { RegisterDto } from './dto/register.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 import { CheckJwt } from './guards/jwt.guard';
 
 @Controller('auth')
@@ -41,7 +46,7 @@ export class AuthController {
 
         req.session.userId = response.result.id;
 
-        const token = this.createJwtToken(req.session.userId, req.session.id, EJwtType.CONFIRMATION, '1h');
+        const token = this.createJwtToken(req.session.userId, req.session.id, EJwtType.CONFIRMATION);
 
         req.session.save((err: any) => {
             // Store registration session only for an hour
@@ -152,9 +157,6 @@ export class AuthController {
         return ServiceResponse.ok(tokens);
     }
 
-
-
-
     @CheckJwt(EJwtType.REFRESH)
     @Get('refresh-token')
     async refreshToken(@Req() req: Request) {
@@ -184,6 +186,56 @@ export class AuthController {
         const tokens = this.createJwtTokens(req.session.userId!, req.session.id);
 
         return ServiceResponse.ok(tokens);
+    }
+
+
+    @Post('recover-password')
+    async recoverPassword(@Body() body: RecoverDto) {
+        const response = await SafeCall.call<typeof this.authService.recoverPassword>(
+            this.authService.recoverPassword(body.email),
+        );
+
+        if (response instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_RECOVER_LINK);
+        }
+
+        return response;
+    }
+
+    @Post('recover/:id')
+    async setPassword(@Body() body: SetPasswordDto, @Param('id') id: string) {
+        const response = await SafeCall.call<typeof this.authService.setPassword>(
+            this.authService.setPassword(id, body.password),
+        );
+
+        if (response instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_USE_RECOVER_LINK);
+        }
+
+        return response;
+    }
+
+    @HtmlPage(HtmlTemplate.RECOVER)
+    @Get('recover/:id')
+    async recoverPage(@Req() req: Request, @Param('id') id: string) {
+        const params: { [k: string]: any; } = {
+            error: null,
+            email: null,
+        };
+
+        const response = await SafeCall.call<typeof this.authService.getRecoverInfo>(
+            this.authService.getRecoverInfo(id),
+        );
+
+        if (response instanceof Error) {
+            params.error = ServiceResponse.CODES.FAIL_USE_RECOVER_LINK.msg;
+        } else if (!response.success) {
+            params.error = response.error.msg;
+        } else {
+            params.email = response.result;
+        }
+
+        return ejs.render(req.ctx.data.html, params);
     }
 
     createJwtToken(userId: string, sessionId: string, type: EJwtType, expiresIn?: string) {
