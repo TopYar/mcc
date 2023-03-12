@@ -5,9 +5,12 @@ import {
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    OneToMany,
     UpdateDateColumn,
 } from 'typeorm';
 
+import { Condition } from '../../conditions/entities/conditions.entity';
+import { Measurement } from '../../conditions/entities/measurements.entity';
 import { IUser } from '../interfaces/user.interface';
 
 @Entity('users')
@@ -24,6 +27,12 @@ export class User implements IUser {
 
     @Column({ select: false })
     public password!: string;
+
+    @OneToMany(() => Condition, (condition: Condition) => condition.user)
+    public conditions!: Condition[];
+
+    @OneToMany(() => Measurement, (measurement: Measurement) => measurement.user)
+    public measurements!: Measurement[];
 
     @Column({ type: 'timestamptz', nullable: true })
     public confirmedAt!: Date | null;
