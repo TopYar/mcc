@@ -67,7 +67,7 @@ export class AuthController {
         );
 
         if (response instanceof Error) {
-            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_REGISTER_USER);
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_RESEND_CODE);
         }
 
         if (!response.success) {
@@ -142,10 +142,10 @@ export class AuthController {
         if (!authResponse.success) {
             switch (authResponse.error.code) {
                 case ServiceResponse.CODES.FAIL_USER_NOT_FOUND.code:
-                case ServiceResponse.CODES.ERROR_INVALID_CREDENTIALS.code:
-                    return ServiceResponse.fail(ServiceResponse.CODES.ERROR_INVALID_CREDENTIALS);
+                case ServiceResponse.CODES.ERROR_INCORRECT_CREDENTIALS.code:
+                    return ServiceResponse.fail(ServiceResponse.CODES.ERROR_INCORRECT_CREDENTIALS);
                 default:
-                    return ServiceResponse.fail(ServiceResponse.CODES.ERROR_UNEXPECTED);
+                    return authResponse;
             }
         }
 

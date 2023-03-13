@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 import { Condition } from '../../conditions/entities/conditions.entity';
-import { Measurement } from '../../conditions/entities/measurements.entity';
+import { Measurement } from '../../measurements/entities/measurements.entity';
 import { IUser } from '../interfaces/user.interface';
 
 @Entity('users')

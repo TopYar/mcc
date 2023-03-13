@@ -9,8 +9,8 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 
+import { Measurement } from '../../measurements/entities/measurements.entity';
 import { User } from '../../users/entities/user.entity';
-import { Measurement } from './measurements.entity';
 
 @Entity('conditions')
 export class Condition {

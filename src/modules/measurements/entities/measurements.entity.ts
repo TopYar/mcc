@@ -8,8 +8,8 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 
+import { Condition } from '../../conditions/entities/conditions.entity';
 import { User } from '../../users/entities/user.entity';
-import { Condition } from './conditions.entity';
 
 @Entity('measurements')
 export class Measurement {

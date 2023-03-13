@@ -36,7 +36,7 @@ const CODES = {
 
     ERROR_DB_QUERY: {
         code: 1000,
-        msg: 'Общая группа ошибок запросов к бд',
+        msg: 'DB error',
     },
     FAIL_GET_USER: {
         code: 1001,
@@ -55,17 +55,17 @@ const CODES = {
         code: 2000,
         msg: 'Общая группа ошибок запросов к сервису',
     },
-    FAIL_REGISTER_USER: {
+    VALIDATION_ERROR: {
         code: 2001,
-        msg: 'Fail to register user',
+        msg: 'Validation error',
     },
-    FAIL_VALIDATION_ERROR: {
+    ERROR_EMAIL_INVALID: {
         code: 2002,
-        msg: 'Ошибка валидации параметров',
+        msg: 'Email is invalid',
     },
-    FAIL_USER_NOT_FOUND: {
+    ERROR_PASSWORD_INVALID: {
         code: 2003,
-        msg: 'User not found',
+        msg: 'Password is invalid',
     },
     ERROR_REFRESH_JWT_TOKEN_REQUIRED: {
         code: 2004,
@@ -75,73 +75,92 @@ const CODES = {
         code: 2005,
         msg: 'You need to provide access jwt only',
     },
-    FAIL_SEND_MAIL: {
+    ERROR_CONFIRMATION_JWT_TOKEN_REQUIRED: {
         code: 2006,
-        msg: 'Fail send mail',
-    },
-    FAIL_CONFIRM_USER: {
-        code: 2007,
-        msg: 'Fail to confirm user email',
-    },
-    FAIL_CREATE_RECOVER_LINK: {
-        code: 2008,
-        msg: 'Fail to create recover link',
-    },
-    FAIL_USE_RECOVER_LINK: {
-        code: 2009,
-        msg: 'Fail to process recover link',
-    },
-    FAIL_GET_RECOVER_LINK: {
-        code: 2010,
-        msg: 'Fail to process recover link',
-    },
-    ERROR_HTML_TEMPLATE_NOT_FOUND: {
-        code: 2011,
-        msg: 'Page not found',
-    },
-
-
-
-    ERROR_NEED_LOGIN: {
-        code: 3000,
-        msg: 'Login is required to use this method',
-    },
-    ERROR_JWT_TOKEN_IS_INVALID: {
-        code: 3001,
-        msg: 'Invalid jwt token',
+        msg: 'You need to provide confirmation jwt only',
     },
     ERROR_JWT_TOKEN_IS_EXPIRED: {
-        code: 3002,
+        code: 2008,
         msg: 'Jwt token is expired',
     },
-    ERROR_INVALID_CREDENTIALS: {
-        code: 3003,
-        msg: 'Provided credentials are invalid',
-    },
-    ERROR_EMAIL_IS_NOT_CONFIRMED: {
-        code: 3004,
-        msg: 'Email is not confirmed',
+    ERROR_INCORRECT_CREDENTIALS: {
+        code: 2009,
+        msg: 'Provided credentials are incorrect',
     },
     ERROR_SESSION_IS_INVALID: {
-        code: 3005,
+        code: 2010,
         msg: 'Session in jwt is not found',
     },
     ERROR_CONFIRMATION_CODE_IS_INVALID: {
-        code: 3006,
+        code: 2011,
         msg: 'Confirmation code is invalid',
     },
-    ERROR_RECOVER_LINK_IS_EXPIRED: {
-        code: 3007,
-        msg: 'Recover link is expired',
+
+    ERROR_JWT_TOKEN_IS_INVALID: {
+        code: 3000,
+        msg: 'Invalid jwt token',
+    },
+    FAIL_USER_NOT_FOUND: {
+        code: 3001,
+        msg: 'User not found',
     },
     ERROR_USER_ALREADY_EXISTS: {
-        code: 3100,
+        code: 3002,
         msg: 'User already exists',
+    },
+    ERROR_EMAIL_IS_NOT_CONFIRMED: {
+        code: 3003,
+        msg: 'Email is not confirmed',
+    },
+    ERROR_RECOVER_LINK_IS_EXPIRED: {
+        code: 3004,
+        msg: 'Recover link is expired',
+    },
+    ERROR_NEED_LOGIN: {
+        code: 3005,
+        msg: 'Login is required to use this method',
+    },
+
+    FAIL_SERVICE_REQUEST: {
+        code: 4000,
+        msg: 'Request to the service was failed',
+    },
+    FAIL_SEND_MAIL: {
+        code: 4001,
+        msg: 'Fail send mail',
+    },
+    FAIL_CONFIRM_USER: {
+        code: 4002,
+        msg: 'Fail to confirm user email',
+    },
+    FAIL_CREATE_RECOVER_LINK: {
+        code: 4003,
+        msg: 'Fail to create recover link',
+    },
+    FAIL_USE_RECOVER_LINK: {
+        code: 4004,
+        msg: 'Fail to process recover link',
+    },
+    FAIL_GET_RECOVER_LINK: {
+        code: 4005,
+        msg: 'Fail to process recover link',
+    },
+    ERROR_HTML_TEMPLATE_NOT_FOUND: {
+        code: 4006,
+        msg: 'Page not found',
+    },
+    FAIL_REGISTER_USER: {
+        code: 4007,
+        msg: 'Fail to register user',
+    },
+    FAIL_RESEND_CODE: {
+        code: 4008,
+        msg: 'Fail to resend code',
     },
 
     ERROR_UNEXPECTED: {
         code: 9999,
-        msg: 'Непредвиденная ошибка',
+        msg: 'Unexpected error',
     },
 };
 

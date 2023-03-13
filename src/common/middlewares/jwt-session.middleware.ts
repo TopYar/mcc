@@ -78,7 +78,7 @@ export class JwtSessionMiddleware implements NestMiddleware {
             }
         } catch (error: any) {
             if (error instanceof TokenExpiredError) {
-                return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_EXPIRED));
+                return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_INVALID));
             } else if (error instanceof JsonWebTokenError) {
                 return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_INVALID));
             }

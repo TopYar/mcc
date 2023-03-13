@@ -11,9 +11,9 @@ export class AuthGuard implements CanActivate {
         const req = context.switchToHttp().getRequest();
 
         if (req.ctx.data.jwt?.type !== EJwtType.ACCESS) {
-            throw new ServiceException(ServiceResponse.CODES.ERROR_REFRESH_JWT_TOKEN_REQUIRED);
+            throw new ServiceException(ServiceResponse.CODES.ERROR_ACCESS_JWT_TOKEN_REQUIRED);
         } else if (req.sessionID !== req.ctx.data.jwt.sessionId) {
-            throw new ServiceException(ServiceResponse.CODES.ERROR_SESSION_IS_INVALID);
+            throw new ServiceException(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_INVALID);
         } else if (!req.session.userId || !req.session.isLogged) {
             throw new ServiceException(ServiceResponse.CODES.ERROR_NEED_LOGIN);
         }

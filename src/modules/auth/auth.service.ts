@@ -49,7 +49,7 @@ export class AuthService {
         );
 
         if (userResponse instanceof Error) {
-            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_REGISTER_USER);
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
         }
 
         if (!userResponse.success) {
@@ -85,7 +85,7 @@ export class AuthService {
         const correctCredentials = await userInstance.comparePassword(password);
 
         if (!correctCredentials) {
-            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_INVALID_CREDENTIALS);
+            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_INCORRECT_CREDENTIALS);
         }
 
         if (!userInstance.confirmedAt) {
