@@ -11,6 +11,7 @@ import {
 
 import { Measurement } from '../../measurements/entities/measurements.entity';
 import { User } from '../../users/entities/user.entity';
+import { ConditionPreset } from './condition-presets.entity';
 
 @Entity('conditions')
 export class Condition {
@@ -28,6 +29,9 @@ export class Condition {
         name: 'conditions_measurements',
     })
     public measurements!: Measurement[];
+
+    @ManyToOne(() => ConditionPreset, (conditionPreset: ConditionPreset) => conditionPreset.conditions)
+    public conditionPreset!: ConditionPreset;
 
     @CreateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })
     public createdAt!: Date;

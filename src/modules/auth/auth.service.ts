@@ -67,7 +67,7 @@ export class AuthService {
         return ServiceResponse.ok(userResponse.result);
     }
 
-    async login({ email, password }: LoginDto): Promise<TResult<User>> {
+    async login({ email, password }: LoginDto) {
         const userResponse = await SafeCall.call<typeof this.usersService.getByEmail>(
             this.usersService.getByEmail({ email, attributes: ['id', 'password', 'confirmedAt'] }),
         );
@@ -76,7 +76,7 @@ export class AuthService {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
         }
 
-        if (!userResponse) {
+        if (!userResponse.success) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_USER_NOT_FOUND);
         }
 
@@ -134,7 +134,7 @@ export class AuthService {
             return userResponse;
         }
 
-        return ServiceResponse.ok();
+        return ServiceResponse.ok(null);
     }
 
     async getRecoverInfo(id: string) {
@@ -187,7 +187,7 @@ export class AuthService {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_SEND_MAIL);
         }
 
-        return ServiceResponse.ok();
+        return ServiceResponse.ok(null);
     }
 
     private async sendRecoverLink(userId: string, email: string) {
@@ -214,6 +214,6 @@ export class AuthService {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_SEND_MAIL);
         }
 
-        return ServiceResponse.ok();
+        return ServiceResponse.ok(null);
     }
 }

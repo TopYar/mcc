@@ -31,7 +31,7 @@ export class EmailService {
 
         this._send(email, subject, rendered);
 
-        return ServiceResponse.ok();
+        return ServiceResponse.ok(null);
     }
 
 }

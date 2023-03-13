@@ -5,11 +5,13 @@ import {
     Entity,
     ManyToMany,
     ManyToOne,
+    OneToMany,
     UpdateDateColumn,
 } from 'typeorm';
 
 import { Condition } from '../../conditions/entities/conditions.entity';
 import { User } from '../../users/entities/user.entity';
+import { MeasurementValue } from './measurement-values.entity';
 
 @Entity('measurements')
 export class Measurement {
@@ -22,11 +24,18 @@ export class Measurement {
     @Column()
     public unit!: string;
 
+    @Column({ default: false })
+    public showTime!: boolean;
+
     @ManyToOne(() => User, (user: User) => user.measurements)
     public user!: User;
 
     @ManyToMany(() => Condition, (condition: Condition) => condition.measurements, {})
     public conditions!: Condition[];
+
+
+    @OneToMany(() => MeasurementValue, (measurementValue: MeasurementValue) => measurementValue.measurement)
+    public measurementValues!: MeasurementValue[];
 
     @CreateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })
     public createdAt!: Date;

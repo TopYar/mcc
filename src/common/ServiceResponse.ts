@@ -6,17 +6,16 @@ export interface IError {
     msg: string,
 }
 
-export interface IOkResult<RESULT = any | null> {
+export interface IOkResult<RESULT> {
     /** Успех  */
     success: true;
     /** Результат, будет только в случае успешного ответа */
     result: RESULT;
 }
-export interface IFailResult<RESULT = any | null> {
+export interface IFailResult {
     /** Успех  */
     success: false;
-    /** Результат, будет только в случае успешного ответа */
-    result: RESULT;
+    result: null;
     error: IError;
 }
 
@@ -120,6 +119,10 @@ const CODES = {
         code: 3005,
         msg: 'Login is required to use this method',
     },
+    FAIL_CONDITION_NOT_FOUND: {
+        code: 3006,
+        msg: 'Condition not found',
+    },
 
     FAIL_SERVICE_REQUEST: {
         code: 4000,
@@ -157,6 +160,10 @@ const CODES = {
         code: 4008,
         msg: 'Fail to resend code',
     },
+    FAIL_GET_CONDITION: {
+        code: 4009,
+        msg: 'Fail get condition',
+    },
 
     ERROR_UNEXPECTED: {
         code: 9999,
@@ -166,13 +173,13 @@ const CODES = {
 
 export const ServiceResponse = {
     CODES: CODES,
-    ok(result: any = null): IOkResult {
+    ok<T>(result: T): IOkResult<T> {
         return {
             success: true,
             result: result,
         };
     },
-    fail<T>(code: { code: number; msg: string; }, result?: T): IFailResult {
+    fail(code: { code: number; msg: string; }, result?: any): IFailResult {
         return {
             success: false,
             result: result ?? undefined,

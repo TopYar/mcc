@@ -8,6 +8,8 @@ import { SessionContext } from '../helpers/session-context';
 export class ContextMiddleware implements NestMiddleware {
     async use(req: Request, res: Response, next: NextFunction) {
         req.ctx = new SessionContext(UUID(), { url: req.url });
+
+        // TODO: настроить логгирование, класть логи на хост сервер
         next();
     }
 }

@@ -75,10 +75,14 @@ export class UsersService {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_USER);
         }
 
+        if (!user) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_USER_NOT_FOUND);
+        }
+
         return ServiceResponse.ok(user);
     }
 
-    async updateUser({ id, name, password, confirmedAt }: IUpdateUserParams): Promise<TResult<User>> {
+    async updateUser({ id, name, password, confirmedAt }: IUpdateUserParams) {
         const user = await SafeCall.call<typeof this.usersRepository.updateUser>(
             this.usersRepository.updateUser({ id }, { name, password, confirmedAt }),
         );

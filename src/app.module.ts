@@ -9,6 +9,8 @@ import { JwtSessionMiddleware } from './common/middlewares/jwt-session.middlewar
 import config from './config';
 import { ormconfig } from './database/ormconfig';
 import { AuthModule } from './modules/auth/auth.module';
+import { ConditionsModule } from './modules/conditions/conditions.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { UsersModule } from './modules/users/users.module';
 import { UsersService } from './modules/users/users.service';
 
@@ -22,6 +24,8 @@ import { UsersService } from './modules/users/users.service';
         }),
         UsersModule,
         AuthModule,
+        ConditionsModule,
+        DashboardModule,
     ],
     controllers: [AppController],
     providers: [AppService, UsersService],

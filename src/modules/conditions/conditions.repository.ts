@@ -4,25 +4,6 @@ import { DataSource, ILike, Repository } from 'typeorm';
 
 import { Condition } from './entities/conditions.entity';
 
-
-export interface IConditionCreate {
-    name: string;
-    userId: string;
-}
-
-export interface IConditionGetOne {
-    id: string;
-    userId: string;
-
-    attributes?: (keyof Condition)[];
-}
-
-export interface IConditionUpdate {
-    id: string;
-    userId: string;
-    name?: string;
-}
-
 @Injectable()
 export class ConditionsRepository extends Repository<Condition> {
 
@@ -32,14 +13,53 @@ export class ConditionsRepository extends Repository<Condition> {
     async createCondition({
         name,
         userId,
+        conditionPresetId,
     }: IConditionCreate) {
-        const condition = this.create({ name, user: { id: userId } });
+        const condition = this.create({ name, user: { id: userId }, conditionPreset: { id: conditionPresetId } });
 
         return this.save(condition);
     }
 
-    async getOne({ id, attributes }: IConditionGetOne) {
-        return this.findOne({ where: { id }, select: attributes });
+    async getOne({ id, userId, attributes, loadRelationIds }: IConditionGetOne) {
+        return this.findOne({
+            where: { id, user: { id: userId } },
+            select: attributes,
+            relations: { conditionPreset: true },
+            loadRelationIds,
+        });
+    }
+
+    async getAll({ userId, attributes, includeMeasurements, includeMeasurementsValues, includeConditionPresets }: IConditionsGetAll) {
+        const relations: { [k: string]: any; } = {};
+
+        if (includeMeasurements) {
+            relations.measurements = true;
+
+            if (includeMeasurementsValues) {
+                relations.measurements = {
+                    measurementValues: true,
+                };
+            }
+        }
+
+        if (includeConditionPresets) {
+            relations.conditionPreset = true;
+        }
+
+        return this.find({
+            where: { user: { id: userId } },
+            select: attributes,
+            relations,
+            order: {
+                createdAt: 'ASC',
+                measurements: {
+                    createdAt: 'ASC',
+                    measurementValues: {
+                        createdAt: 'DESC',
+                    },
+                },
+            },
+        });
     }
 
     async updateCondition(condition: { id: string; }, payload: IConditionUpdate) {
@@ -63,4 +83,33 @@ export class ConditionsRepository extends Repository<Condition> {
             }
         }
     }
+}
+
+
+export interface IConditionCreate {
+    name: string;
+    userId: string;
+    conditionPresetId?: string;
+}
+
+export interface IConditionGetOne {
+    id: string;
+    userId?: string;
+
+    attributes?: (keyof Condition)[];
+    loadRelationIds?: boolean;
+}
+
+export interface IConditionsGetAll {
+    userId: string;
+    includeMeasurements?: boolean;
+    includeMeasurementsValues?: boolean;
+    includeConditionPresets?: boolean;
+    attributes?: (keyof Condition)[];
+}
+
+export interface IConditionUpdate {
+    id: string;
+    userId: string;
+    name?: string;
 }

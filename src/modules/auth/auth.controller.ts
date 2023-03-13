@@ -79,7 +79,7 @@ export class AuthController {
             redisClient.EXPIRE(config.server.sessionPrefix + req.session.id, 60 * 60);
         });
 
-        return ServiceResponse.ok();
+        return ServiceResponse.ok(null);
     }
 
     @CheckJwt(EJwtType.CONFIRMATION)
@@ -128,7 +128,11 @@ export class AuthController {
 
         req.session.isLogged = true;
 
+        await this.regenerateSession(req);
+        await redisClient.DEL(key);
+
         const tokens = this.createJwtTokens(req.session.userId!, req.session.id);
+
 
         // await redisClient.EXPIRE(config.server.sessionPrefix + ':' + req.session.id, ttl);
 
@@ -160,9 +164,21 @@ export class AuthController {
     @CheckJwt(EJwtType.REFRESH)
     @Get('refresh-token')
     async refreshToken(@Req() req: Request) {
+        await this.regenerateSession(req);
+
+        const tokens = this.createJwtTokens(req.session.userId!, req.session.id);
+
+        return ServiceResponse.ok(tokens);
+    }
+
+
+    private async regenerateSession(req: Request) {
         const sessionToDestroy = req.session.id;
 
-        await new Promise<void>(resolve => {
+        return new Promise<void>(async (resolve) => {
+            await new Promise<void>(res => req.session.save(() => {
+                res();
+            }));
             req.sessionStore.generate(req);
             req.sessionStore.get(sessionToDestroy, async function(err, session) {
                 if (err) {
@@ -182,12 +198,7 @@ export class AuthController {
                 });
             });
         });
-
-        const tokens = this.createJwtTokens(req.session.userId!, req.session.id);
-
-        return ServiceResponse.ok(tokens);
     }
-
 
     @Post('recover-password')
     async recoverPassword(@Body() body: RecoverDto) {
