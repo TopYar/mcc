@@ -25,7 +25,7 @@ export class Measurement {
     public unit!: string;
 
     @Column({ default: false })
-    public showTime!: boolean;
+    public displayTime!: boolean;
 
     @ManyToOne(() => User, (user: User) => user.measurements)
     public user!: User;

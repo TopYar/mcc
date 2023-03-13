@@ -1,6 +1,5 @@
 import {
-    Controller, Get,
-    Param, Req, UseGuards,
+    Controller, Get, Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -47,8 +46,8 @@ export class DashboardController {
                             id: measurement.id,
                             name: measurement.name,
                             unit: measurement.unit,
-                            showTime: measurement.showTime,
-                            values: measurement.measurementValues.map(value => {
+                            displayTime: measurement.displayTime,
+                            values: measurement.measurementValues.slice(0, 3).map(value => {
                                 return {
                                     value: value.value,
                                     createdAt: value.createdAt,
@@ -121,7 +120,7 @@ interface DashboardDto {
             id: string,
             name: string,
             unit: string,
-            showTime: boolean,
+            displayTime: boolean,
             values: {
                 value: string,
                 createdAt: Date;
