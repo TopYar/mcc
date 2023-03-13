@@ -14,12 +14,12 @@ export class JwtSessionMiddleware implements NestMiddleware {
     }
     async use(req: Request, res: Response, next: NextFunction) {
         try {
-            if (req.headers.authorization) {
-                const token = req.headers.authorization.split(' ')?.[1];
+            if (req.headers.authorization || req.headers['jwt']) {
+                const token = req.headers['jwt'] ?? req.headers.authorization!.split(' ')?.[1];
 
                 // If token was provided in header
                 if (token) {
-                    const data = this.jwtService.verify<IJwtPayload>(token);
+                    const data = this.jwtService.verify<IJwtPayload>(token as string);
 
                     const sessionId = aesDecrypt(data.sessionId);
 
