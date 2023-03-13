@@ -8,6 +8,7 @@ import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { ConditionsService } from '../conditions/conditions.service';
 import { Condition } from '../conditions/entities/conditions.entity';
+import { MeasurementDto } from '../measurements/dto/measurement.dto';
 
 
 @Controller('/dashboard')
@@ -49,6 +50,7 @@ export class DashboardController {
                             displayTime: measurement.displayTime,
                             values: measurement.measurementValues.slice(0, 3).map(value => {
                                 return {
+                                    id: value.id,
                                     value: value.value,
                                     createdAt: value.createdAt,
                                 };
@@ -116,16 +118,7 @@ interface DashboardDto {
     conditions: {
         id: string,
         name: string,
-        measurements: {
-            id: string,
-            name: string,
-            unit: string,
-            displayTime: boolean,
-            values: {
-                value: string,
-                createdAt: Date;
-            }[];
-        }[];
+        measurements: MeasurementDto[];
     }[];
 
     diet: {

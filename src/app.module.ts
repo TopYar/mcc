@@ -11,6 +11,7 @@ import { ormconfig } from './database/ormconfig';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConditionsModule } from './modules/conditions/conditions.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { MeasurementsModule } from './modules/measurements/measurements.module';
 import { UsersModule } from './modules/users/users.module';
 import { UsersService } from './modules/users/users.service';
 
@@ -25,6 +26,7 @@ import { UsersService } from './modules/users/users.service';
         UsersModule,
         AuthModule,
         ConditionsModule,
+        MeasurementsModule,
         DashboardModule,
     ],
     controllers: [AppController],

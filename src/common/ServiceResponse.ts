@@ -164,6 +164,10 @@ const CODES = {
         code: 4009,
         msg: 'Fail get condition',
     },
+    FAIL_GET_MEASUREMENTS: {
+        code: 4010,
+        msg: 'Fail get measurements',
+    },
 
     ERROR_UNEXPECTED: {
         code: 9999,
