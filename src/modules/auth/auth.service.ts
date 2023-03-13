@@ -163,7 +163,7 @@ export class AuthService {
     private async sendCode(userId: string, email: string) {
         const key = `${config.server.confirmationPrefix}${userId}`;
         const code = randomstring.generate({
-            length: 6,
+            length: 4,
             charset: 'numeric',
         });
 
