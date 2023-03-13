@@ -1,6 +1,6 @@
 import {
-    Controller, Get,
-    Param, Req, UseGuards,
+    Body,
+    Controller, Get, Param, Post, Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -8,6 +8,7 @@ import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { ConditionsService } from './conditions.service';
+import { CreateConditionDto } from './dto/create-condition.dto';
 
 
 @Controller('/conditions')
@@ -32,6 +33,23 @@ export class ConditionsController {
     async getCondition(@Param('id') id: string, @Req() req: Request) {
         const conditionResponse = await SafeCall.call<typeof this.conditionsService.getOne>(
             this.conditionsService.getOne({ id, userId: req.session.userId }),
+        );
+
+        if (conditionResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
+        }
+
+        return conditionResponse;
+    }
+
+    @UseGuards(AuthGuard)
+    @Post()
+    async createCondition(@Body() body: CreateConditionDto, @Req() req: Request) {
+        const conditionResponse = await SafeCall.call<typeof this.conditionsService.createCondition>(
+            this.conditionsService.createCondition({
+                ...body,
+                userId: req.session.userId!,
+            }),
         );
 
         if (conditionResponse instanceof Error) {

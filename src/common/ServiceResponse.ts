@@ -94,6 +94,10 @@ const CODES = {
         code: 2011,
         msg: 'Confirmation code is invalid',
     },
+    ERROR_NAME_OR_PRESET_ID_REQUIRED: {
+        code: 2012,
+        msg: `Parameter 'name' or 'conditionPresetId' is required`,
+    },
 
     ERROR_JWT_TOKEN_IS_INVALID: {
         code: 3000,
@@ -122,6 +126,10 @@ const CODES = {
     FAIL_CONDITION_NOT_FOUND: {
         code: 3006,
         msg: 'Condition not found',
+    },
+    FAIL_CONDITION_PRESET_NOT_FOUND: {
+        code: 3007,
+        msg: 'Condition preset not found',
     },
 
     FAIL_SERVICE_REQUEST: {
@@ -175,6 +183,14 @@ const CODES = {
     FAIL_GET_MEASUREMENTS_PRESETS: {
         code: 4012,
         msg: 'Fail get condition presets',
+    },
+    FAIL_CREATE_CONDITION: {
+        code: 4013,
+        msg: 'Fail create condition',
+    },
+    FAIL_CREATE_MEASUREMENT: {
+        code: 4013,
+        msg: 'Fail create measurement',
     },
 
     ERROR_UNEXPECTED: {

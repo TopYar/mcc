@@ -14,8 +14,23 @@ export class ConditionsRepository extends Repository<Condition> {
         name,
         userId,
         conditionPresetId,
+        measurementIds,
     }: IConditionCreate) {
-        const condition = this.create({ name, user: { id: userId }, conditionPreset: { id: conditionPresetId } });
+        const args: { [k: string]: any; } = {};
+
+        if (conditionPresetId) {
+            args.conditionPreset = { id: conditionPresetId };
+        }
+
+        if (measurementIds && measurementIds.length) {
+            args.measurements = measurementIds.map((m: string) => ({ id: m }));
+        }
+
+        const condition = this.create({
+            name,
+            user: { id: userId },
+            ...args,
+        });
 
         return this.save(condition);
     }
@@ -90,6 +105,7 @@ export interface IConditionCreate {
     name: string;
     userId: string;
     conditionPresetId?: string;
+    measurementIds?: string[];
 }
 
 export interface IConditionGetOne {

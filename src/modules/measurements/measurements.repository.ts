@@ -22,6 +22,12 @@ export class MeasurementsRepository extends Repository<Measurement> {
         return this.save(measurement);
     }
 
+    async bulkCreate(entities: IMeasurementCreate[]) {
+        const instances = this.create(entities);
+
+        return this.save(instances);
+    }
+
     async getAll({ userId, attributes, includeMeasurementsValues }: IMeasurementsGetAll) {
         const relations: { [k: string]: any; } = {};
 

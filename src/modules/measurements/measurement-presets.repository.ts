@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 import { MeasurementPreset } from './entities/measurement-presets.entity';
 
@@ -10,11 +10,22 @@ export class MeasurementPresetsRepository extends Repository<MeasurementPreset> 
         super(MeasurementPreset, dataSource.createEntityManager());
     }
 
-    getAll(conditionPresetId: string) {
-        return this.find({
-            where: {
-                conditionPresets: { id: conditionPresetId },
-            },
-        });
+    getAll({ id, conditionPresetId }: IGetAllParams) {
+        const where: { [k: string]: any; } = {};
+
+        if (id) {
+            where.id = In(id);
+        }
+
+        if (conditionPresetId) {
+            where.conditionPresets = { id: conditionPresetId };
+        }
+
+        return this.find({ where });
     }
+}
+
+interface IGetAllParams {
+    id?: string[];
+    conditionPresetId?: string;
 }

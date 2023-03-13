@@ -45,12 +45,18 @@ export class MeasurementsService {
         }));
     }
 
-    async getPresets(userId: string, conditionPresetId: string) {
-        const presets = await SafeCall.call<typeof this.measurementPresetsRepository.getAll>(
-            this.measurementPresetsRepository.getAll(conditionPresetId));
+    async getPresets(userId: string, conditionPresetId?: string) {
+        let presets: IMeasurement[] = [];
 
-        if (presets instanceof Error) {
-            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+        if (conditionPresetId) {
+            const presetsResponse = await SafeCall.call<typeof this.measurementPresetsRepository.getAll>(
+                this.measurementPresetsRepository.getAll({ conditionPresetId }));
+
+            if (presetsResponse instanceof Error) {
+                return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+            }
+
+            presets = presetsResponse;
         }
 
         const userMeasurements = await SafeCall.call<typeof this.measurementsRepository.getAll>(
@@ -77,10 +83,42 @@ export class MeasurementsService {
             }),
         });
     }
+
+    async createFromPresets(id: string[], userId: string) {
+        const presets = await SafeCall.call<typeof this.measurementPresetsRepository.getAll>(
+            this.measurementPresetsRepository.getAll({ id }));
+
+        if (presets instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+        }
+
+        const entitiesToCreate = presets.map(p => ({
+            name: p.name,
+            unit: p.unit,
+            displayTime: p.displayTime,
+            userId,
+        }));
+
+        const measurements = await SafeCall.call<typeof this.measurementsRepository.bulkCreate>(
+            this.measurementsRepository.bulkCreate(entitiesToCreate));
+
+        if (measurements instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+        }
+
+        return ServiceResponse.ok(measurements.map(m => m.id));
+    }
 }
 
 
 interface IGetAllParams {
     userId: string;
     includeMeasurementsValues?: boolean;
+}
+
+interface IMeasurement {
+    id: string;
+    name: string;
+    unit: string;
+    displayTime: boolean;
 }

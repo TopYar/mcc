@@ -3,8 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { ServiceResponse, TResult } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
+import { MeasurementsService } from '../measurements/measurements.service';
 import { ConditionPresetsRepository } from './condition-presets.repository';
-import { ConditionsRepository, IConditionGetOne, IConditionUpdate } from './conditions.repository';
+import { ConditionsRepository, IConditionCreate, IConditionGetOne, IConditionUpdate } from './conditions.repository';
+import { CreateConditionDto } from './dto/create-condition.dto';
+import { ConditionPreset } from './entities/condition-presets.entity';
+import { Condition } from './entities/conditions.entity';
 
 
 @Injectable()
@@ -14,7 +18,79 @@ export class ConditionsService {
         private readonly conditionsRepository: ConditionsRepository,
         @InjectRepository(ConditionPresetsRepository)
         private readonly conditionPresetsRepository: ConditionPresetsRepository,
+
+        private readonly measurementsService: MeasurementsService,
     ) {}
+
+    async createCondition({ userId, name, conditionPresetId, measurements }: ICreateParams) {
+        if (!name && !conditionPresetId) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
+        }
+
+        const args: any = { userId };
+
+        if (conditionPresetId) {
+            const conditionPreset: ConditionPreset | null | Error = await SafeCall.call<typeof this.conditionPresetsRepository.getOne>(
+                this.conditionPresetsRepository.getOne(conditionPresetId));
+
+            if (conditionPreset instanceof Error) {
+                return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION_PRESETS);
+            }
+
+            if (!conditionPreset) {
+                return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CONDITION_PRESET_NOT_FOUND);
+            }
+
+            args.conditionPresetId = conditionPreset.id;
+            args.name = conditionPreset.name;
+        } else {
+            args.name = name;
+        }
+
+        if (measurements) {
+            const bindMeasurementIds = [];
+
+            if (measurements.presets) {
+                const presetsResponse = await SafeCall.call<typeof this.measurementsService.createFromPresets>(
+                    this.measurementsService.createFromPresets(measurements.presets, userId));
+
+                if (presetsResponse instanceof Error) {
+                    return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+                }
+
+                if (!presetsResponse.success) {
+                    return presetsResponse;
+                }
+
+                bindMeasurementIds.push(presetsResponse.result);
+            }
+
+            if (measurements.tracking) {
+                bindMeasurementIds.push(measurements.tracking);
+            }
+
+            args.measurementIds = bindMeasurementIds;
+        }
+
+        const condition = await SafeCall.call<typeof this.conditionsRepository.createCondition>(
+            this.conditionsRepository.createCondition(args));
+
+        if (condition instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_CONDITION);
+        }
+
+        if (!condition) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CONDITION_NOT_FOUND);
+        }
+
+        return ServiceResponse.ok({
+            id: condition.id,
+            name: condition.name,
+            conditionPresetId: condition.conditionPreset,
+            createdAt: condition.createdAt,
+            updatedAt: condition.createdAt,
+        });
+    }
 
     async getOne(args: IGetOneParams) {
         const condition = await SafeCall.call<typeof this.conditionsRepository.getOne>(
@@ -70,6 +146,16 @@ export class ConditionsService {
             name: preset.name,
         })));
     }
+}
+
+interface ICreateParams {
+    name?: string;
+    conditionPresetId?: string;
+    measurements?: {
+        tracking?: string[];
+        presets?: string[];
+    };
+    userId: string;
 }
 
 interface IGetOneParams {

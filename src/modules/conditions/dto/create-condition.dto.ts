@@ -1,3 +1,8 @@
 export interface CreateConditionDto {
-    name: string;
+    name?: string;
+    conditionPresetId?: string;
+    measurements?: {
+        tracking?: string[];
+        presets?: string[];
+    };
 }
