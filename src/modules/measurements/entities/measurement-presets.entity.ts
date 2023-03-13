@@ -21,6 +21,9 @@ export class MeasurementPreset {
     @Column()
     public unit!: string;
 
+    @Column({ default: false })
+    public displayTime!: boolean;
+
     @ManyToMany(() => ConditionPreset, (conditionPreset: ConditionPreset) => conditionPreset.measurementPresets, {})
     public conditionPresets!: ConditionPreset[];
 

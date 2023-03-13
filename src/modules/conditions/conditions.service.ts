@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { ServiceResponse, TResult } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
+import { ConditionPresetsRepository } from './condition-presets.repository';
 import { ConditionsRepository, IConditionGetOne, IConditionUpdate } from './conditions.repository';
 
 
@@ -11,6 +12,8 @@ export class ConditionsService {
     constructor(
         @InjectRepository(ConditionsRepository)
         private readonly conditionsRepository: ConditionsRepository,
+        @InjectRepository(ConditionPresetsRepository)
+        private readonly conditionPresetsRepository: ConditionPresetsRepository,
     ) {}
 
     async getOne(args: IGetOneParams) {
@@ -52,6 +55,20 @@ export class ConditionsService {
         }
 
         return ServiceResponse.ok(conditions);
+    }
+
+    async getPresets() {
+        const presets = await SafeCall.call<typeof this.conditionPresetsRepository.find>(
+            this.conditionPresetsRepository.find());
+
+        if (presets instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION_PRESETS);
+        }
+
+        return ServiceResponse.ok(presets.map(preset => ({
+            id: preset.id,
+            name: preset.name,
+        })));
     }
 }
 

@@ -14,8 +14,21 @@ import { ConditionsService } from './conditions.service';
 export class ConditionsController {
     constructor(private readonly conditionsService: ConditionsService) {}
 
+    @Get('presets')
+    async getPresets(@Req() req: Request) {
+        const presets = await SafeCall.call<typeof this.conditionsService.getPresets>(
+            this.conditionsService.getPresets(),
+        );
+
+        if (presets instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION_PRESETS);
+        }
+
+        return presets;
+    }
+
     @UseGuards(AuthGuard)
-    @Get('/:id')
+    @Get(':id')
     async getCondition(@Param('id') id: string, @Req() req: Request) {
         const conditionResponse = await SafeCall.call<typeof this.conditionsService.getOne>(
             this.conditionsService.getOne({ id, userId: req.session.userId }),
@@ -27,18 +40,4 @@ export class ConditionsController {
 
         return conditionResponse;
     }
-
-
-    // @Get('presets')
-    // async getPresets(@Req() req: Request) {
-    //     const condition = await SafeCall.call<typeof this.conditionsService.getOne>(
-    //         this.conditionsService.getOne({ id, userId: req.session.userId }),
-    //     );
-    //
-    //     if (condition instanceof Error) {
-    //         return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CONDITION_NOT_FOUND);
-    //     }
-    //
-    //     return this.conditionsService.getOne({ id, userId: req.session.userId! });
-    // }
 }

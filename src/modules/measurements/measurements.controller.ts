@@ -1,6 +1,6 @@
 import {
-    Controller, Get,
-    Param, Req, UseGuards,
+    Controller, Get, Query,
+    Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -13,6 +13,21 @@ import { MeasurementsService } from './measurements.service';
 @Controller('/measurements')
 export class MeasurementsController {
     constructor(private readonly measurementsService: MeasurementsService) {}
+
+
+    @UseGuards(AuthGuard)
+    @Get('presets')
+    async getPresets(@Query() params: { conditionPresetId: string; }, @Req() req: Request) {
+        const presets = await SafeCall.call<typeof this.measurementsService.getPresets>(
+            this.measurementsService.getPresets(req.session.userId!, params.conditionPresetId),
+        );
+
+        if (presets instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+        }
+
+        return presets;
+    }
 
     @UseGuards(AuthGuard)
     @Get()
@@ -30,18 +45,4 @@ export class MeasurementsController {
 
         return response;
     }
-
-
-    // @Get('presets')
-    // async getPresets(@Req() req: Request) {
-    //     const condition = await SafeCall.call<typeof this.conditionsService.getOne>(
-    //         this.conditionsService.getOne({ id, userId: req.session.userId }),
-    //     );
-    //
-    //     if (condition instanceof Error) {
-    //         return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CONDITION_NOT_FOUND);
-    //     }
-    //
-    //     return this.conditionsService.getOne({ id, userId: req.session.userId! });
-    // }
 }

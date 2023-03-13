@@ -168,6 +168,14 @@ const CODES = {
         code: 4010,
         msg: 'Fail get measurements',
     },
+    FAIL_GET_CONDITION_PRESETS: {
+        code: 4011,
+        msg: 'Fail get condition presets',
+    },
+    FAIL_GET_MEASUREMENTS_PRESETS: {
+        code: 4012,
+        msg: 'Fail get condition presets',
+    },
 
     ERROR_UNEXPECTED: {
         code: 9999,
