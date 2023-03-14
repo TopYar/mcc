@@ -131,6 +131,10 @@ const CODES = {
         code: 3007,
         msg: 'Condition preset not found',
     },
+    FAIL_MEASUREMENT_NOT_FOUND: {
+        code: 3008,
+        msg: 'Measurement not found',
+    },
 
     FAIL_SERVICE_REQUEST: {
         code: 4000,
@@ -195,6 +199,14 @@ const CODES = {
     FAIL_UPDATE_CONDITION: {
         code: 4013,
         msg: 'Fail create measurement',
+    },
+    FAIL_GET_MEASUREMENT: {
+        code: 4014,
+        msg: 'Fail get measurement',
+    },
+    FAIL_UPDATE_MEASUREMENT: {
+        code: 4015,
+        msg: 'Fail update measurement',
     },
 
     ERROR_UNEXPECTED: {

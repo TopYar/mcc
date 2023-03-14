@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, ILike, Repository } from 'typeorm';
 
+import { IConditionUpdate } from '../conditions/conditions.repository';
 import { Measurement } from './entities/measurements.entity';
+import { MeasurementsService } from './measurements.service';
 
 
 @Injectable()
@@ -28,24 +30,80 @@ export class MeasurementsRepository extends Repository<Measurement> {
         return this.save(instances);
     }
 
-    async getAll({ userId, attributes, includeMeasurementsValues }: IMeasurementsGetAll) {
+    async getOne({ id, userId, attributes, includeMeasurementsValues }: IMeasurementsGetOne) {
         const relations: { [k: string]: any; } = {};
+        const order: { [k: string]: any; } = { createdAt: 'ASC' };
 
         if (includeMeasurementsValues) {
             relations.measurementValues = true;
+            order.measurementValues = {
+                createdAt: 'DESC',
+            };
+        }
+
+        return this.findOne({
+            where: { id, user: { id: userId } },
+            select: attributes,
+            relations,
+            order,
+        });
+    }
+
+    async getAll({ userId, attributes, includeMeasurementsValues }: IMeasurementsGetAll) {
+        const relations: { [k: string]: any; } = {};
+        const order: { [k: string]: any; } = { createdAt: 'ASC' };
+
+        if (includeMeasurementsValues) {
+            relations.measurementValues = true;
+            order.measurementValues = {
+                createdAt: 'DESC',
+            };
         }
 
         return this.find({
             where: { user: { id: userId } },
             select: attributes,
             relations,
-            order: {
-                createdAt: 'ASC',
-                measurementValues: {
-                    createdAt: 'DESC',
-                },
-            },
+            order,
         });
+    }
+
+    async updateMeasurement(measurement: { id: string; }, payload: IMeasurementUpdate) {
+        const args: { [k: string]: any; } = {};
+
+        if (payload.name) {
+            args.name = payload.name;
+        }
+
+        if (payload.unit) {
+            args.unit = payload.unit;
+        }
+
+        if (payload.displayTime !== undefined) {
+            args.displayTime = payload.displayTime;
+        }
+
+
+        if (!_.isEmpty(args)) {
+            const measurementInstance = this.create({
+                id: measurement.id,
+                user: { id: payload.userId },
+                ...args,
+            });
+
+            const measurementResult = await this.createQueryBuilder()
+                .update(Measurement)
+                .set(measurementInstance)
+                .where({ id: measurement.id, user: { id: payload.userId } })
+                .returning('*')
+                .execute();
+
+            if (measurementResult.raw.length) {
+                Object.assign(measurement, measurementResult.raw[0]);
+            }
+
+            return measurementResult.raw[0];
+        }
     }
 }
 
@@ -61,4 +119,18 @@ export interface IMeasurementsGetAll {
     userId: string;
     includeMeasurementsValues?: boolean;
     attributes?: (keyof Measurement)[];
+}
+
+export interface IMeasurementsGetOne {
+    id: string;
+    userId: string;
+    includeMeasurementsValues?: boolean;
+    attributes?: (keyof Measurement)[];
+}
+
+export interface IMeasurementUpdate {
+    userId: string;
+    name?: string;
+    unit?: string;
+    displayTime?: boolean;
 }

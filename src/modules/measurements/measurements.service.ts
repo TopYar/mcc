@@ -21,6 +21,59 @@ export class MeasurementsService {
         private readonly measurementPresetsRepository: MeasurementPresetsRepository,
     ) {}
 
+    async getOne({ id, userId, includeMeasurementsValues }: IGetOneParams) {
+        const measurement = await SafeCall.call<typeof this.measurementsRepository.getOne>(
+            this.measurementsRepository.getOne({
+                id,
+                userId,
+                includeMeasurementsValues,
+            }));
+
+        if (measurement instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENT);
+        }
+
+        if (!measurement) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_MEASUREMENT_NOT_FOUND);
+        }
+
+        const result: MeasurementDto = {
+            id: measurement.id,
+            name: measurement.name,
+            unit: measurement.unit,
+            displayTime: measurement.displayTime,
+            values: includeMeasurementsValues ? measurement.measurementValues.map(value => {
+                return {
+                    id: value.id,
+                    value: value.value,
+                    createdAt: value.createdAt,
+                };
+            }) : undefined,
+        };
+
+        return ServiceResponse.ok(result);
+    }
+
+    async updateMeasurement({ id, name, unit, displayTime, userId }: IUpdateParams): Promise<TResult<MeasurementDto>> {
+        const measurement = await SafeCall.call<typeof this.measurementsRepository.updateMeasurement>(
+            this.measurementsRepository.updateMeasurement({ id }, { userId, name, unit, displayTime }));
+
+        if (measurement instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_UPDATE_MEASUREMENT);
+        }
+
+        if (!measurement) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_MEASUREMENT_NOT_FOUND);
+        }
+
+        return ServiceResponse.ok({
+            id: measurement.id,
+            name: measurement.name,
+            unit: measurement.unit,
+            displayTime: measurement.displayTime,
+        });
+    }
+
     async getAll({ userId, includeMeasurementsValues }: IGetAllParams) {
         const measurements = await SafeCall.call<typeof this.measurementsRepository.getAll>(
             this.measurementsRepository.getAll({
@@ -47,7 +100,6 @@ export class MeasurementsService {
                 }) : [],
             } satisfies MeasurementDto as MeasurementDto;
         }));
-
     }
 
     async getPresets({ userId, conditionPresetId, conditionId }: IGetPresetsParams) {
@@ -162,6 +214,19 @@ interface IGetPresetsParams {
 interface IGetAllParams {
     userId: string;
     includeMeasurementsValues?: boolean;
+}
+interface IGetOneParams {
+    id: string;
+    userId: string;
+    includeMeasurementsValues?: boolean;
+}
+
+interface IUpdateParams {
+    id: string;
+    userId: string;
+    name?: string;
+    unit?: string;
+    displayTime?: boolean;
 }
 
 interface IMeasurement {

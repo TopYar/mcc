@@ -14,7 +14,7 @@ export default {
         jwtSecret: process.env.MCC_JWT_SECRET,
         jwt: {
             jwtSecret: process.env.MCC_JWT_SECRET,
-            accessExpiration: process.env.MCC_JWT_ACCESS_EXPIRATION, // minutes
+            accessExpiration: process.env.MCC_JWT_ACCESS_EXPIRATION, // hours
         },
         aes: {
             iv: process.env.MCC_AES_IV,

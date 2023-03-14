@@ -183,7 +183,7 @@ export class ConditionsService {
             if (measurements.tracking) {
                 bindMeasurementIds = bindMeasurementIds.concat(
                     // Add only newly checked measurements for tracking
-                    measurements.tracking.filter(m => !conditionMeasurements.has(m)),
+                    Array.from(new Set(measurements.tracking.filter(m => !conditionMeasurements.has(m)))),
                 );
 
                 unbindMeasurementIds = unbindMeasurementIds.concat(

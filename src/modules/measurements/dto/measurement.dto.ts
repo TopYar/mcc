@@ -3,7 +3,7 @@ export interface MeasurementDto {
     name: string,
     unit: string,
     displayTime: boolean,
-    values: {
+    values?: {
         id: string,
         value: string,
         createdAt: Date;
