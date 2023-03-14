@@ -67,13 +67,13 @@ export class ConditionsController {
 
         const conditionInstance = conditionResponse.result;
 
-        return {
+        return ServiceResponse.ok({
             id: conditionInstance.id,
             name: conditionInstance.name,
             createdAt: conditionInstance.createdAt,
             updatedAt: conditionInstance.updatedAt,
             ...presetsResponse.result,
-        };
+        });
     }
 
     @UseGuards(AuthGuard)
