@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { MeasurementsModule } from '../measurements/measurements.module';
@@ -12,7 +12,7 @@ import { Condition } from './entities/conditions.entity';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Condition, ConditionPreset]),
-        MeasurementsModule,
+        forwardRef(() => MeasurementsModule),
     ],
     controllers: [ConditionsController],
     providers: [ConditionsService, ConditionsRepository, ConditionPresetsRepository],

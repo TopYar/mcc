@@ -17,9 +17,12 @@ export class MeasurementsController {
 
     @UseGuards(AuthGuard)
     @Get('available')
-    async getPresets(@Query() params: { conditionPresetId?: string; }, @Req() req: Request) {
+    async getPresets(@Query() params: { conditionPresetId?: string, conditionId?: string; }, @Req() req: Request) {
         const presets = await SafeCall.call<typeof this.measurementsService.getPresets>(
-            this.measurementsService.getPresets(req.session.userId!, params.conditionPresetId),
+            this.measurementsService.getPresets({
+                userId: req.session.userId!,
+                ...params,
+            }),
         );
 
         if (presets instanceof Error) {

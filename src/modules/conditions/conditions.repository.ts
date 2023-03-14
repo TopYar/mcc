@@ -35,12 +35,17 @@ export class ConditionsRepository extends Repository<Condition> {
         return this.save(condition);
     }
 
-    async getOne({ id, userId, attributes, loadRelationIds }: IConditionGetOne) {
+    async getOne({ id, userId, attributes, includeMeasurements }: IConditionGetOne) {
+        const relations: { [k: string]: any; } = { conditionPreset: true };
+
+        if (includeMeasurements) {
+            relations.measurements = true;
+        }
+
         return this.findOne({
             where: { id, user: { id: userId } },
             select: attributes,
-            relations: { conditionPreset: true },
-            loadRelationIds,
+            relations,
         });
     }
 
@@ -113,7 +118,7 @@ export interface IConditionGetOne {
     userId?: string;
 
     attributes?: (keyof Condition)[];
-    loadRelationIds?: boolean;
+    includeMeasurements?: boolean;
 }
 
 export interface IConditionsGetAll {

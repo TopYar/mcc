@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ServiceResponse, TResult } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
+import { ConditionsService } from '../conditions/conditions.service';
 import { MeasurementDto } from './dto/measurement.dto';
 import { MeasurementPresetsRepository } from './measurement-presets.repository';
 import { MeasurementsRepository } from './measurements.repository';
@@ -11,6 +12,9 @@ import { MeasurementsRepository } from './measurements.repository';
 @Injectable()
 export class MeasurementsService {
     constructor(
+
+        @Inject(forwardRef(() => ConditionsService))
+        private readonly conditionsService: ConditionsService,
         @InjectRepository(MeasurementsRepository)
         private readonly measurementsRepository: MeasurementsRepository,
         @InjectRepository(MeasurementPresetsRepository)
@@ -45,8 +49,31 @@ export class MeasurementsService {
         }));
     }
 
-    async getPresets(userId: string, conditionPresetId?: string) {
+    async getPresets({ userId, conditionPresetId, conditionId }: IGetPresetsParams) {
         let presets: IMeasurement[] = [];
+        const userTrackingMeasurements = new Set();
+
+        if (conditionId) {
+            const conditionResponse = await SafeCall.call<typeof this.conditionsService.getOne>(
+                this.conditionsService.getOne({ id: conditionId, userId, includeMeasurements: true }));
+
+            if (conditionResponse instanceof Error) {
+                return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
+            }
+
+            if (!conditionResponse.success) {
+                return conditionResponse;
+            }
+
+            if (conditionResponse.result.conditionPreset) {
+                conditionPresetId = conditionResponse.result.conditionPreset.id;
+            }
+
+            if (conditionResponse.result.measurements.length) {
+                conditionResponse.result.measurements.forEach(m => userTrackingMeasurements.add(m.id));
+            }
+
+        }
 
         if (conditionPresetId) {
             const presetsResponse = await SafeCall.call<typeof this.measurementPresetsRepository.getAll>(
@@ -67,19 +94,22 @@ export class MeasurementsService {
         }
 
         return ServiceResponse.ok({
-            tracking: userMeasurements.map(measurement => ({
-                id: measurement.id,
-                name: measurement.name,
-                unit: measurement.unit,
-                displayTime: measurement.displayTime,
-            })),
+            tracking: userMeasurements.map(measurement => {
+                return {
+                    id: measurement.id,
+                    name: measurement.name,
+                    unit: measurement.unit,
+                    displayTime: measurement.displayTime,
+                    isTracking: userTrackingMeasurements.has(measurement.id),
+                } satisfies IMeasurement;
+            }),
             presets: presets.filter(p => userMeasurements.findIndex(m => m.name === p.name) < 0).map(preset => {
                 return {
                     id: preset.id,
                     name: preset.name,
                     unit: preset.unit,
                     displayTime: preset.displayTime,
-                };
+                } satisfies IMeasurement;
             }),
         });
     }
@@ -110,6 +140,11 @@ export class MeasurementsService {
     }
 }
 
+interface IGetPresetsParams {
+    userId: string;
+    conditionPresetId?: string;
+    conditionId?: string;
+}
 
 interface IGetAllParams {
     userId: string;
@@ -121,4 +156,5 @@ interface IMeasurement {
     name: string;
     unit: string;
     displayTime: boolean;
+    isTracking?: boolean;
 }

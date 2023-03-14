@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ServiceResponse, TResult } from '../../common/ServiceResponse';
@@ -19,6 +19,8 @@ export class ConditionsService {
         @InjectRepository(ConditionPresetsRepository)
         private readonly conditionPresetsRepository: ConditionPresetsRepository,
 
+
+        @Inject(forwardRef(() => MeasurementsService))
         private readonly measurementsService: MeasurementsService,
     ) {}
 
@@ -94,7 +96,7 @@ export class ConditionsService {
 
     async getOne(args: IGetOneParams) {
         const condition = await SafeCall.call<typeof this.conditionsRepository.getOne>(
-            this.conditionsRepository.getOne({ ...args, loadRelationIds: true }));
+            this.conditionsRepository.getOne({ ...args }));
 
         if (condition instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
@@ -107,7 +109,8 @@ export class ConditionsService {
         return ServiceResponse.ok({
             id: condition.id,
             name: condition.name,
-            conditionPresetId: condition.conditionPreset,
+            conditionPreset: condition.conditionPreset,
+            measurements: condition.measurements,
             createdAt: condition.createdAt,
             updatedAt: condition.createdAt,
         });
@@ -161,6 +164,10 @@ interface ICreateParams {
 interface IGetOneParams {
     id: string;
     userId?: string;
+
+    attributes?: (keyof Condition)[];
+
+    includeMeasurements?: boolean;
 }
 
 interface IGetAllParams {
