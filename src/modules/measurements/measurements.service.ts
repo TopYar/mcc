@@ -5,9 +5,9 @@ import { ServiceResponse, TResult } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { ConditionsService } from '../conditions/conditions.service';
 import { MeasurementDto } from './dto/measurement.dto';
-import { MeasurementPresetsRepository } from './measurement-presets.repository';
-import { MeasurementValuesRepository } from './measurement-values.repository';
-import { MeasurementsRepository } from './measurements.repository';
+import { MeasurementPresetsRepository } from './repositories/measurement-presets.repository';
+import { MeasurementValuesRepository } from './repositories/measurement-values.repository';
+import { MeasurementsRepository } from './repositories/measurements.repository';
 
 
 @Injectable()

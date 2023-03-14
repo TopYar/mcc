@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, ILike, Repository } from 'typeorm';
 
-import { IConditionUpdate } from '../conditions/conditions.repository';
-import { Measurement } from './entities/measurements.entity';
-import { MeasurementsService } from './measurements.service';
+import { IConditionUpdate } from '../../conditions/conditions.repository';
+import { Measurement } from '../entities/measurements.entity';
+import { MeasurementsService } from '../measurements.service';
 
 
 @Injectable()

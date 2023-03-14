@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import _ from 'lodash';
 import { DataSource, ILike, Repository } from 'typeorm';
 
-import { MeasurementValue } from './entities/measurement-values.entity';
-import { Measurement } from './entities/measurements.entity';
+import { MeasurementValue } from '../entities/measurement-values.entity';
+import { Measurement } from '../entities/measurements.entity';
 
 
 @Injectable()
@@ -20,10 +19,23 @@ export class MeasurementValuesRepository extends Repository<MeasurementValue> {
 
         return this.save(measurement);
     }
+
+    async deleteMeasurement({ id, measurementId }: IMeasurementValueDelete) {
+        return this.createQueryBuilder()
+            .softDelete()
+            .from(MeasurementValue)
+            .where({ id: id, measurement: { id: measurementId } })
+            .execute();
+    }
 }
 
 
 export interface IMeasurementValueCreate {
     measurementId: string;
     value: string;
+}
+
+interface IMeasurementValueDelete {
+    id: string;
+    measurementId: string;
 }

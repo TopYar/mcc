@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, In, Repository } from 'typeorm';
 
-import { MeasurementPreset } from './entities/measurement-presets.entity';
+import { MeasurementPreset } from '../entities/measurement-presets.entity';
 
 
 @Injectable()
