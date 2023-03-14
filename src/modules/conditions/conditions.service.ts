@@ -19,7 +19,6 @@ export class ConditionsService {
         @InjectRepository(ConditionPresetsRepository)
         private readonly conditionPresetsRepository: ConditionPresetsRepository,
 
-
         @Inject(forwardRef(() => MeasurementsService))
         private readonly measurementsService: MeasurementsService,
     ) {}

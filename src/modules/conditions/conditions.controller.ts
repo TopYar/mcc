@@ -1,5 +1,6 @@
 import {
-    Body, Controller, Get, Param, Post, Put,
+    Body, Controller, forwardRef,
+    Get, Inject, Param, Post, Put, Query,
     Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -7,6 +8,7 @@ import { Request } from 'express';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { MeasurementsService } from '../measurements/measurements.service';
 import { ConditionsService } from './conditions.service';
 import { CreateConditionDto } from './dto/create-condition.dto';
 import { UpdateConditionDto } from './dto/update-condition.dto';
@@ -14,7 +16,11 @@ import { UpdateConditionDto } from './dto/update-condition.dto';
 
 @Controller('/conditions')
 export class ConditionsController {
-    constructor(private readonly conditionsService: ConditionsService) {}
+    constructor(
+        private readonly conditionsService: ConditionsService,
+
+        @Inject(forwardRef(() => MeasurementsService))
+        private readonly measurementsService: MeasurementsService) {}
 
     @Get('presets')
     async getPresets(@Req() req: Request) {
@@ -30,17 +36,44 @@ export class ConditionsController {
     }
 
     @UseGuards(AuthGuard)
-    @Get(':id')
-    async getCondition(@Param('id') id: string, @Req() req: Request) {
+    @Get()
+    async getCondition(@Query() params: { id: string; }, @Req() req: Request) {
         const conditionResponse = await SafeCall.call<typeof this.conditionsService.getOne>(
-            this.conditionsService.getOne({ id, userId: req.session.userId }),
+            this.conditionsService.getOne({ id: params.id, userId: req.session.userId }),
         );
 
         if (conditionResponse instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
         }
 
-        return conditionResponse;
+        if (!conditionResponse.success) {
+            return conditionResponse;
+        }
+
+        const presetsResponse = await SafeCall.call<typeof this.measurementsService.getPresets>(
+            this.measurementsService.getPresets({
+                userId: req.session.userId!,
+                conditionId: params.id,
+            }),
+        );
+
+        if (presetsResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+        }
+
+        if (!presetsResponse.success) {
+            return presetsResponse;
+        }
+
+        const conditionInstance = conditionResponse.result;
+
+        return {
+            id: conditionInstance.id,
+            name: conditionInstance.name,
+            createdAt: conditionInstance.createdAt,
+            updatedAt: conditionInstance.updatedAt,
+            ...presetsResponse.result,
+        };
     }
 
     @UseGuards(AuthGuard)
