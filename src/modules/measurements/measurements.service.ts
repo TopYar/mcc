@@ -109,6 +109,7 @@ export class MeasurementsService {
                     name: preset.name,
                     unit: preset.unit,
                     displayTime: preset.displayTime,
+                    isTracking: false,
                 } satisfies IMeasurement;
             }),
         });
