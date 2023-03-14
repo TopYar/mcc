@@ -27,7 +27,7 @@ export class Measurement {
     @Column({ default: false })
     public displayTime!: boolean;
 
-    @ManyToOne(() => User, (user: User) => user.measurements)
+    @ManyToOne(() => User, (user: User) => user.measurements, { nullable: false })
     public user!: User;
 
     @ManyToMany(() => Condition, (condition: Condition) => condition.measurements, {})

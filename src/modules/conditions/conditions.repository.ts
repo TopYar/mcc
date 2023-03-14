@@ -89,12 +89,16 @@ export class ConditionsRepository extends Repository<Condition> {
             args.name = payload.name;
         }
 
+        if (payload.bindMeasurementIds?.length) {
+            args.measurements = payload.bindMeasurementIds.map((m: string) => ({ id: m }));
+        }
+
         if (!_.isEmpty(args)) {
             const conditionInstance = this.create({ id: condition.id, ...args });
             const conditionResult = await this.createQueryBuilder()
                 .update(Condition)
                 .set(conditionInstance)
-                .where({ id: condition.id, userId: payload.userId })
+                .where({ id: condition.id, user: { id: payload.userId } })
                 .returning('*')
                 .execute();
 
@@ -111,6 +115,13 @@ export interface IConditionCreate {
     userId: string;
     conditionPresetId?: string;
     measurementIds?: string[];
+}
+
+export interface IConditionUpdate {
+    userId: string;
+    name?: string;
+    bindMeasurementIds?: string[];
+    unbindMeasurementIds?: string[];
 }
 
 export interface IConditionGetOne {

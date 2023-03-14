@@ -38,15 +38,16 @@ export class MeasurementsService {
                 name: measurement.name,
                 unit: measurement.unit,
                 displayTime: measurement.displayTime,
-                values: measurement.measurementValues.map(value => {
+                values: includeMeasurementsValues ? measurement.measurementValues.map(value => {
                     return {
                         id: value.id,
                         value: value.value,
                         createdAt: value.createdAt,
                     };
-                }),
+                }) : [],
             } satisfies MeasurementDto as MeasurementDto;
         }));
+
     }
 
     async getPresets({ userId, conditionPresetId, conditionId }: IGetPresetsParams) {
@@ -115,6 +116,17 @@ export class MeasurementsService {
         });
     }
 
+    async getAllPresets(id?: string[]) {
+        const presets = await SafeCall.call<typeof this.measurementPresetsRepository.getAll>(
+            this.measurementPresetsRepository.getAll({ id }));
+
+        if (presets instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+        }
+
+        return ServiceResponse.ok(presets);
+    }
+
     async createFromPresets(id: string[], userId: string) {
         const presets = await SafeCall.call<typeof this.measurementPresetsRepository.getAll>(
             this.measurementPresetsRepository.getAll({ id }));
@@ -127,7 +139,7 @@ export class MeasurementsService {
             name: p.name,
             unit: p.unit,
             displayTime: p.displayTime,
-            userId,
+            user: { id: userId },
         }));
 
         const measurements = await SafeCall.call<typeof this.measurementsRepository.bulkCreate>(

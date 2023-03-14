@@ -12,12 +12,12 @@ export class MeasurementsRepository extends Repository<Measurement> {
         super(Measurement, dataSource.createEntityManager());
     }
     async createMeasurement({
-        userId,
+        user,
         name,
         unit,
         displayTime,
     }: IMeasurementCreate) {
-        const measurement = this.create({ name, unit, displayTime, user: { id: userId } });
+        const measurement = this.create({ name, unit, displayTime, user });
 
         return this.save(measurement);
     }
@@ -51,8 +51,7 @@ export class MeasurementsRepository extends Repository<Measurement> {
 
 
 export interface IMeasurementCreate {
-
-    userId: string;
+    user: { id: string; };
     name: string;
     unit: string;
     displayTime: boolean;

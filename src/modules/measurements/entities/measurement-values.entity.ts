@@ -18,7 +18,7 @@ export class MeasurementValue {
     @Column({ type: 'decimal' })
     public value!: string;
 
-    @ManyToOne(() => Measurement, (measurement: Measurement) => measurement.measurementValues)
+    @ManyToOne(() => Measurement, (measurement: Measurement) => measurement.measurementValues, { nullable: false })
     public measurement!: Measurement;
 
     @CreateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })

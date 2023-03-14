@@ -192,6 +192,10 @@ const CODES = {
         code: 4013,
         msg: 'Fail create measurement',
     },
+    FAIL_UPDATE_CONDITION: {
+        code: 4013,
+        msg: 'Fail create measurement',
+    },
 
     ERROR_UNEXPECTED: {
         code: 9999,

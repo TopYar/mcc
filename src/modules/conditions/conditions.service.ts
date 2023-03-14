@@ -26,7 +26,7 @@ export class ConditionsService {
 
     async createCondition({ userId, name, conditionPresetId, measurements }: ICreateParams) {
         if (!name && !conditionPresetId) {
-            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
+            return ServiceResponse.fail(ServiceResponse.CODES.ERROR_NAME_OR_PRESET_ID_REQUIRED);
         }
 
         const args: any = { userId };
@@ -88,9 +88,125 @@ export class ConditionsService {
         return ServiceResponse.ok({
             id: condition.id,
             name: condition.name,
-            conditionPresetId: condition.conditionPreset,
             createdAt: condition.createdAt,
             updatedAt: condition.createdAt,
+        });
+    }
+    async updateCondition({ id, userId, name, measurements }: IUpdateParams) {
+        const args: any = { userId, name };
+
+        const userTrackingMeasurementNames = new Set();
+        const userTrackingMeasurementIds = new Set();
+
+        // Get condition with tracking measurements
+        const conditionResponse = await SafeCall.call<typeof this.getOne>(
+            this.getOne({ id, userId, includeMeasurements: true }));
+
+        if (conditionResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION);
+        }
+
+        if (!conditionResponse.success) {
+            return conditionResponse;
+        }
+
+        const conditionInstance = conditionResponse.result;
+
+        if (conditionInstance.conditionPreset) {
+            args.name = conditionInstance.conditionPreset.name;
+        }
+
+        if (conditionInstance.measurements.length) {
+            conditionInstance.measurements.forEach(m => {
+                userTrackingMeasurementIds.add(m.id);
+            });
+        }
+
+        const userMeasurementsResponse = await SafeCall.call<typeof this.measurementsService.getAll>(
+            this.measurementsService.getAll({ userId }));
+
+        if (userMeasurementsResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS);
+        }
+
+        if (!userMeasurementsResponse.success) {
+            return userMeasurementsResponse;
+        }
+
+        const userMeasurements = userMeasurementsResponse.result;
+
+        if (userMeasurements.length) {
+            userMeasurements.map(m => {
+                userTrackingMeasurementNames.add(m.name);
+            });
+        }
+
+        if (measurements) {
+            let bindMeasurementIds: string[] = [];
+            let unbindMeasurementIds: string[] = [];
+
+            if (measurements.presets) {
+                const chosenPresetsResponse = await SafeCall.call<typeof this.measurementsService.getAllPresets>(
+                    this.measurementsService.getAllPresets(measurements.presets));
+
+                if (chosenPresetsResponse instanceof Error) {
+                    return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS_PRESETS);
+                }
+
+                if (!chosenPresetsResponse.success) {
+                    return chosenPresetsResponse;
+                }
+
+                // const chosenPresets = new Set(chosenPresetsResponse.result.map(p => p.id));
+                const chosenPresets = chosenPresetsResponse.result;
+                const presetsToCreate = chosenPresets
+                    .filter(p => !userTrackingMeasurementNames.has(p.name))
+                    .map(p => p.id);
+
+                const presetsResponse = await SafeCall.call<typeof this.measurementsService.createFromPresets>(
+                    this.measurementsService.createFromPresets(presetsToCreate, userId));
+
+                if (presetsResponse instanceof Error) {
+                    return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+                }
+
+                if (!presetsResponse.success) {
+                    return presetsResponse;
+                }
+
+                bindMeasurementIds = bindMeasurementIds.concat(presetsResponse.result);
+            }
+
+            if (measurements.tracking) {
+                bindMeasurementIds = bindMeasurementIds.concat(
+                    // Add only newly checked measurements for tracking
+                    measurements.tracking.filter(m => !userTrackingMeasurementIds.has(m)),
+                );
+
+                unbindMeasurementIds = unbindMeasurementIds.concat(
+                    // Unbind all options that were unchecked
+                    conditionInstance.measurements
+                        .filter(m => !measurements.tracking!.includes(m.id))
+                        .map(m => m.id),
+                );
+            }
+
+            args.bindMeasurementIds = bindMeasurementIds;
+            args.unbindMeasurementIds = unbindMeasurementIds;
+        }
+
+        const updateResult = await SafeCall.call<typeof this.conditionsRepository.updateCondition>(
+            this.conditionsRepository.updateCondition(conditionInstance, args));
+
+        if (updateResult instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_UPDATE_CONDITION);
+        }
+
+        return ServiceResponse.ok({
+            id: conditionInstance.id,
+            name: conditionInstance.name,
+            createdAt: conditionInstance.createdAt,
+            updatedAt: conditionInstance.createdAt,
         });
     }
 
@@ -159,6 +275,16 @@ interface ICreateParams {
         presets?: string[];
     };
     userId: string;
+}
+
+interface IUpdateParams {
+    id: string;
+    userId: string;
+    name?: string;
+    measurements?: {
+        tracking?: string[];
+        presets?: string[];
+    };
 }
 
 interface IGetOneParams {
