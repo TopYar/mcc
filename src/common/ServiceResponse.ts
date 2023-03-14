@@ -220,6 +220,10 @@ const CODES = {
         code: 4018,
         msg: 'Fail to delete measurement value',
     },
+    FAIL_LOGOUT: {
+        code: 4019,
+        msg: 'Fail to logout',
+    },
 
     ERROR_UNEXPECTED: {
         code: 9999,

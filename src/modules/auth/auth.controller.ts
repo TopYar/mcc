@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import ejs from 'ejs';
 import { Request } from 'express';
@@ -21,6 +21,7 @@ import { LoginDto } from './dto/login.dto';
 import { RecoverDto } from './dto/recover.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
+import { AuthGuard } from './guards/auth.guard';
 import { CheckJwt } from './guards/jwt.guard';
 
 @Controller('auth')
@@ -169,6 +170,19 @@ export class AuthController {
         const tokens = this.createJwtTokens(req.session.userId!, req.session.id);
 
         return ServiceResponse.ok(tokens);
+    }
+    @UseGuards(AuthGuard)
+    @Delete('logout')
+    async logout(@Req() req: Request) {
+        return new Promise((resolve) => {
+            req.session.destroy((err) => {
+                if (err) {
+                    resolve(ServiceResponse.fail(ServiceResponse.CODES.FAIL_LOGOUT));
+                } else {
+                    resolve(ServiceResponse.ok(null));
+                }
+            });
+        });
     }
 
 
