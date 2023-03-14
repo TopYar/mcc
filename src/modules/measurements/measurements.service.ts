@@ -6,6 +6,7 @@ import { SafeCall } from '../../utils/safeCall';
 import { ConditionsService } from '../conditions/conditions.service';
 import { MeasurementDto } from './dto/measurement.dto';
 import { MeasurementPresetsRepository } from './measurement-presets.repository';
+import { MeasurementValuesRepository } from './measurement-values.repository';
 import { MeasurementsRepository } from './measurements.repository';
 
 
@@ -19,6 +20,8 @@ export class MeasurementsService {
         private readonly measurementsRepository: MeasurementsRepository,
         @InjectRepository(MeasurementPresetsRepository)
         private readonly measurementPresetsRepository: MeasurementPresetsRepository,
+        @InjectRepository(MeasurementValuesRepository)
+        private readonly measurementValuesRepository: MeasurementValuesRepository,
     ) {}
 
     async getOne({ id, userId, includeMeasurementsValues }: IGetOneParams) {
@@ -53,7 +56,6 @@ export class MeasurementsService {
 
         return ServiceResponse.ok(result);
     }
-
 
     async createMeasurement({ name, unit, displayTime, userId }: ICreateParams): Promise<TResult<MeasurementDto>> {
         const measurement = await SafeCall.call<typeof this.measurementsRepository.createMeasurement>(
@@ -220,6 +222,32 @@ export class MeasurementsService {
 
         return ServiceResponse.ok(measurements.map(m => m.id));
     }
+
+    async addMeasurementValue({ userId, measurementId, value }: IAddMeasurementValueParams) {
+        const measurementResponse = await SafeCall.call<typeof this.getOne>(
+            this.getOne({ id: measurementId, userId }));
+
+        if (measurementResponse instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENT);
+        }
+
+        if (!measurementResponse.success) {
+            return measurementResponse;
+        }
+
+        const measurementValue = await SafeCall.call<typeof this.measurementValuesRepository.createMeasurementValue>(
+            this.measurementValuesRepository.createMeasurementValue({ measurementId, value }));
+
+        if (measurementValue instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_ADD_MEASUREMENT_VALUE);
+        }
+
+        return ServiceResponse.ok({
+            id: measurementValue.id,
+            value: measurementValue.value,
+            measurementId: measurementValue.measurement.id,
+        });
+    }
 }
 
 interface IGetPresetsParams {
@@ -252,6 +280,12 @@ interface IUpdateParams {
     name?: string;
     unit?: string;
     displayTime?: boolean;
+}
+
+interface IAddMeasurementValueParams {
+    userId: string;
+    measurementId: string;
+    value: string;
 }
 
 interface IMeasurement {

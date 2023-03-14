@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { AddMeasurementValueDto } from './dto/add-measurement-value.dto';
 import { CreateMeasurementDto } from './dto/create-measurement.dto';
 import { UpdateMeasurementDto } from './dto/update-measurement.dto';
 import { MeasurementsService } from './measurements.service';
@@ -92,6 +93,20 @@ export class MeasurementsController {
 
         if (response instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_UPDATE_MEASUREMENT);
+        }
+
+        return response;
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('values')
+    async addMeasurementValue(@Body() body: AddMeasurementValueDto, @Req() req: Request) {
+        const response = await SafeCall.call<typeof this.measurementsService.addMeasurementValue>(
+            this.measurementsService.addMeasurementValue({ userId: req.session.userId!, ...body }),
+        );
+
+        if (response instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
         }
 
         return response;

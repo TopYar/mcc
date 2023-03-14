@@ -10,12 +10,12 @@ import { Measurement } from './entities/measurements.entity';
 export class MeasurementValuesRepository extends Repository<MeasurementValue> {
 
     constructor(private dataSource: DataSource) {
-        super(Measurement, dataSource.createEntityManager());
+        super(MeasurementValue, dataSource.createEntityManager());
     }
     async createMeasurementValue({
         measurementId,
         value,
-    }: IMeasurementCreate) {
+    }: IMeasurementValueCreate) {
         const measurement = this.create({ value, measurement: { id: measurementId } });
 
         return this.save(measurement);
@@ -23,7 +23,7 @@ export class MeasurementValuesRepository extends Repository<MeasurementValue> {
 }
 
 
-export interface IMeasurementCreate {
+export interface IMeasurementValueCreate {
     measurementId: string;
     value: string;
 }

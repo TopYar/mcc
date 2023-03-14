@@ -208,6 +208,10 @@ const CODES = {
         code: 4015,
         msg: 'Fail update measurement',
     },
+    FAIL_ADD_MEASUREMENT_VALUE: {
+        code: 4016,
+        msg: 'Fail to add measurement value',
+    },
 
     ERROR_UNEXPECTED: {
         code: 9999,

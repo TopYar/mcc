@@ -6,6 +6,7 @@ import { MeasurementPreset } from './entities/measurement-presets.entity';
 import { MeasurementValue } from './entities/measurement-values.entity';
 import { Measurement } from './entities/measurements.entity';
 import { MeasurementPresetsRepository } from './measurement-presets.repository';
+import { MeasurementValuesRepository } from './measurement-values.repository';
 import { MeasurementsController } from './measurements.controller';
 import { MeasurementsRepository } from './measurements.repository';
 import { MeasurementsService } from './measurements.service';
@@ -16,7 +17,7 @@ import { MeasurementsService } from './measurements.service';
         forwardRef(() => ConditionsModule),
     ],
     controllers: [MeasurementsController],
-    providers: [MeasurementsService, MeasurementsRepository, MeasurementPresetsRepository],
+    providers: [MeasurementsService, MeasurementsRepository, MeasurementPresetsRepository, MeasurementValuesRepository],
     exports: [MeasurementsService],
 })
 export class MeasurementsModule {}
