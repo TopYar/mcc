@@ -95,7 +95,7 @@ export class ConditionsService {
         const args: any = { userId, name };
 
         const userTrackingMeasurementNames = new Set();
-        const userTrackingMeasurementIds = new Set();
+        const conditionMeasurements = new Set();
 
         // Get condition with tracking measurements
         const conditionResponse = await SafeCall.call<typeof this.getOne>(
@@ -116,13 +116,15 @@ export class ConditionsService {
         }
 
         if (conditionInstance.measurements.length) {
-            conditionInstance.measurements.forEach(m => {
-                userTrackingMeasurementIds.add(m.id);
-            });
+            conditionInstance.measurements
+                .forEach(m => conditionMeasurements.add(m.id));
         }
+
+        // Get all user measurements
 
         const userMeasurementsResponse = await SafeCall.call<typeof this.measurementsService.getAll>(
             this.measurementsService.getAll({ userId }));
+
 
         if (userMeasurementsResponse instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS);
@@ -162,24 +164,26 @@ export class ConditionsService {
                     .filter(p => !userTrackingMeasurementNames.has(p.name))
                     .map(p => p.id);
 
-                const presetsResponse = await SafeCall.call<typeof this.measurementsService.createFromPresets>(
-                    this.measurementsService.createFromPresets(presetsToCreate, userId));
+                if (presetsToCreate.length) {
+                    const presetsResponse = await SafeCall.call<typeof this.measurementsService.createFromPresets>(
+                        this.measurementsService.createFromPresets(presetsToCreate, userId));
 
-                if (presetsResponse instanceof Error) {
-                    return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+                    if (presetsResponse instanceof Error) {
+                        return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+                    }
+
+                    if (!presetsResponse.success) {
+                        return presetsResponse;
+                    }
+
+                    bindMeasurementIds = bindMeasurementIds.concat(presetsResponse.result);
                 }
-
-                if (!presetsResponse.success) {
-                    return presetsResponse;
-                }
-
-                bindMeasurementIds = bindMeasurementIds.concat(presetsResponse.result);
             }
 
             if (measurements.tracking) {
                 bindMeasurementIds = bindMeasurementIds.concat(
                     // Add only newly checked measurements for tracking
-                    measurements.tracking.filter(m => !userTrackingMeasurementIds.has(m)),
+                    measurements.tracking.filter(m => !conditionMeasurements.has(m)),
                 );
 
                 unbindMeasurementIds = unbindMeasurementIds.concat(

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, ILike, Repository } from 'typeorm';
 
+import { Measurement } from '../measurements/entities/measurements.entity';
 import { Condition } from './entities/conditions.entity';
 
 @Injectable()
@@ -89,23 +90,31 @@ export class ConditionsRepository extends Repository<Condition> {
             args.name = payload.name;
         }
 
-        if (payload.bindMeasurementIds?.length) {
-            args.measurements = payload.bindMeasurementIds.map((m: string) => ({ id: m }));
-        }
+        const conditionInstance = this.create({
+            id: condition.id,
+            user: { id: payload.userId },
+            ...args,
+        });
 
-        if (!_.isEmpty(args)) {
-            const conditionInstance = this.create({ id: condition.id, ...args });
-            const conditionResult = await this.createQueryBuilder()
-                .update(Condition)
-                .set(conditionInstance)
-                .where({ id: condition.id, user: { id: payload.userId } })
-                .returning('*')
-                .execute();
-
-            if (conditionResult.raw.length) {
-                Object.assign(condition, conditionResult.raw[0]);
+        return this.dataSource.transaction(async (entityManager) => {
+            if (payload.bindMeasurementIds?.length) {
+                await entityManager
+                    .createQueryBuilder()
+                    .relation(Condition, 'measurements')
+                    .of({ id: condition.id })
+                    .add(payload.bindMeasurementIds.map(id => ({ id })));
             }
-        }
+
+            if (payload.unbindMeasurementIds?.length) {
+                await entityManager
+                    .createQueryBuilder()
+                    .relation(Condition, 'measurements')
+                    .of({ id: condition.id })
+                    .remove(payload.unbindMeasurementIds.map(id => ({ id })));
+            }
+
+            return this.save(conditionInstance);
+        });
     }
 }
 
@@ -138,10 +147,4 @@ export interface IConditionsGetAll {
     includeMeasurementsValues?: boolean;
     includeConditionPresets?: boolean;
     attributes?: (keyof Condition)[];
-}
-
-export interface IConditionUpdate {
-    id: string;
-    userId: string;
-    name?: string;
 }
