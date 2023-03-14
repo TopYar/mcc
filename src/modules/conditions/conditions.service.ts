@@ -48,7 +48,7 @@ export class ConditionsService {
         }
 
         if (measurements) {
-            const bindMeasurementIds = [];
+            let bindMeasurementIds: string[] = [];
 
             if (measurements.presets) {
                 const presetsResponse = await SafeCall.call<typeof this.measurementsService.createFromPresets>(
@@ -62,11 +62,11 @@ export class ConditionsService {
                     return presetsResponse;
                 }
 
-                bindMeasurementIds.push(presetsResponse.result);
+                bindMeasurementIds = bindMeasurementIds.concat(presetsResponse.result);
             }
 
             if (measurements.tracking) {
-                bindMeasurementIds.push(measurements.tracking);
+                bindMeasurementIds = bindMeasurementIds.concat(measurements.tracking);
             }
 
             args.measurementIds = bindMeasurementIds;
