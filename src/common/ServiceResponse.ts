@@ -208,9 +208,17 @@ const CODES = {
         code: 4015,
         msg: 'Fail update measurement',
     },
-    FAIL_ADD_MEASUREMENT_VALUE: {
+    FAIL_DELETE_MEASUREMENT: {
         code: 4016,
+        msg: 'Fail to delete measurement',
+    },
+    FAIL_ADD_MEASUREMENT_VALUE: {
+        code: 4017,
         msg: 'Fail to add measurement value',
+    },
+    FAIL_DELETE_MEASUREMENT_VALUE: {
+        code: 4018,
+        msg: 'Fail to delete measurement value',
     },
 
     ERROR_UNEXPECTED: {

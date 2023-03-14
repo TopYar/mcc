@@ -1,7 +1,7 @@
 import {
     Body,
-    Controller, Get, Post, Put,
-    Query, Req, UseGuards,
+    Controller, Delete,
+    Get, Post, Put, Query, Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 
@@ -93,6 +93,20 @@ export class MeasurementsController {
 
         if (response instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_UPDATE_MEASUREMENT);
+        }
+
+        return response;
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete()
+    async deleteMeasurement(@Query() params: { id: string; }, @Req() req: Request) {
+        const response = await SafeCall.call<typeof this.measurementsService.deleteMeasurement>(
+            this.measurementsService.deleteMeasurement({ id: params.id, userId: req.session.userId! }),
+        );
+
+        if (response instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_DELETE_MEASUREMENT);
         }
 
         return response;

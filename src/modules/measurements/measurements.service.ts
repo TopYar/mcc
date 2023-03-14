@@ -92,6 +92,20 @@ export class MeasurementsService {
             displayTime: measurement.displayTime,
         });
     }
+    async deleteMeasurement({ id, userId }: IDeleteParams) {
+        const measurement = await SafeCall.call<typeof this.measurementsRepository.deleteMeasurement>(
+            this.measurementsRepository.deleteMeasurement({ id, userId }));
+
+        if (measurement instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_DELETE_MEASUREMENT);
+        }
+
+        if (!measurement.affected) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_MEASUREMENT_NOT_FOUND);
+        }
+
+        return ServiceResponse.ok(null);
+    }
 
     async getAll({ userId, includeMeasurementsValues }: IGetAllParams) {
         const measurements = await SafeCall.call<typeof this.measurementsRepository.getAll>(
@@ -280,6 +294,11 @@ interface IUpdateParams {
     name?: string;
     unit?: string;
     displayTime?: boolean;
+}
+
+interface IDeleteParams {
+    id: string;
+    userId: string;
 }
 
 interface IAddMeasurementValueParams {

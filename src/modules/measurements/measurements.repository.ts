@@ -105,6 +105,13 @@ export class MeasurementsRepository extends Repository<Measurement> {
             return measurementResult.raw[0];
         }
     }
+    async deleteMeasurement({ id, userId }: IMeasurementDelete) {
+        return this.createQueryBuilder()
+            .softDelete()
+            .from(Measurement)
+            .where({ id: id, user: { id: userId } })
+            .execute();
+    }
 }
 
 
@@ -133,4 +140,9 @@ export interface IMeasurementUpdate {
     name?: string;
     unit?: string;
     displayTime?: boolean;
+}
+
+export interface IMeasurementDelete {
+    id: string;
+    userId: string;
 }
