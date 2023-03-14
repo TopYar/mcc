@@ -8,7 +8,8 @@ import { Request } from 'express';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { UpdateConditionDto } from '../conditions/dto/update-condition.dto';
+import { CreateMeasurementDto } from './dto/create-measurement.dto';
+import { UpdateMeasurementDto } from './dto/update-measurement.dto';
 import { MeasurementsService } from './measurements.service';
 
 
@@ -67,9 +68,24 @@ export class MeasurementsController {
         return response;
     }
 
+
+    @UseGuards(AuthGuard)
+    @Post()
+    async createMeasurement(@Body() body: CreateMeasurementDto, @Req() req: Request) {
+        const response = await SafeCall.call<typeof this.measurementsService.createMeasurement>(
+            this.measurementsService.createMeasurement({ userId: req.session.userId!, ...body }),
+        );
+
+        if (response instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+        }
+
+        return response;
+    }
+
     @UseGuards(AuthGuard)
     @Put()
-    async updateMeasurement(@Body() body: UpdateConditionDto, @Req() req: Request) {
+    async updateMeasurement(@Body() body: UpdateMeasurementDto, @Req() req: Request) {
         const response = await SafeCall.call<typeof this.measurementsService.updateMeasurement>(
             this.measurementsService.updateMeasurement({ userId: req.session.userId!, ...body }),
         );

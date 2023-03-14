@@ -54,6 +54,23 @@ export class MeasurementsService {
         return ServiceResponse.ok(result);
     }
 
+
+    async createMeasurement({ name, unit, displayTime, userId }: ICreateParams): Promise<TResult<MeasurementDto>> {
+        const measurement = await SafeCall.call<typeof this.measurementsRepository.createMeasurement>(
+            this.measurementsRepository.createMeasurement({ user: { id: userId }, name, unit, displayTime }));
+
+        if (measurement instanceof Error) {
+            return ServiceResponse.fail(ServiceResponse.CODES.FAIL_CREATE_MEASUREMENT);
+        }
+
+        return ServiceResponse.ok({
+            id: measurement.id,
+            name: measurement.name,
+            unit: measurement.unit,
+            displayTime: measurement.displayTime,
+        });
+    }
+
     async updateMeasurement({ id, name, unit, displayTime, userId }: IUpdateParams): Promise<TResult<MeasurementDto>> {
         const measurement = await SafeCall.call<typeof this.measurementsRepository.updateMeasurement>(
             this.measurementsRepository.updateMeasurement({ id }, { userId, name, unit, displayTime }));
@@ -219,6 +236,14 @@ interface IGetOneParams {
     id: string;
     userId: string;
     includeMeasurementsValues?: boolean;
+}
+
+
+interface ICreateParams {
+    userId: string;
+    name: string;
+    unit: string;
+    displayTime: boolean;
 }
 
 interface IUpdateParams {
