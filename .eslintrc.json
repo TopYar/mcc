@@ -11,7 +11,8 @@
   "plugins": [
     "@typescript-eslint/eslint-plugin",
     "simple-import-sort",
-    "typescript-formatter"
+    "typescript-formatter",
+    "jest"
   ],
   "env": {
     "commonjs": true,
