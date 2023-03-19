@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
+import { ELang } from '../../common/helpers/lang';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -23,9 +24,9 @@ export class ConditionsController {
         private readonly measurementsService: MeasurementsService) {}
 
     @Get('presets')
-    async getPresets(@Req() req: Request) {
+    async getPresets(@Req() req: Request, @Query() params: { lang?: ELang; }) {
         const presets = await SafeCall.call<typeof this.conditionsService.getPresets>(
-            this.conditionsService.getPresets(),
+            this.conditionsService.getPresets(params.lang),
         );
 
         if (presets instanceof Error) {

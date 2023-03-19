@@ -18,8 +18,14 @@ export class MeasurementPreset {
     @Column()
     public name!: string;
 
+    @Column({ nullable: true })
+    public name_ru!: string;
+
     @Column()
     public unit!: string;
+
+    @Column({ nullable: true })
+    public unit_ru!: string;
 
     @Column({ default: false })
     public displayTime!: boolean;

@@ -1,8 +1,10 @@
 import {
-    Controller, Get, Req, UseGuards,
+    Controller, Get, Query,
+    Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 
+import { ELang } from '../../common/helpers/lang';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -17,7 +19,7 @@ export class DashboardController {
 
     @UseGuards(AuthGuard)
     @Get()
-    async getDashboard(@Req() req: Request) {
+    async getDashboard(@Req() req: Request, @Query() params: { lang?: ELang; }) {
         const conditionResponse = await SafeCall.call<typeof this.conditionsService.getAll>(
             this.conditionsService.getAll({
                 userId: req.session.userId!,
@@ -35,7 +37,7 @@ export class DashboardController {
             return conditionResponse;
         }
 
-        const diet = this.calculateDiet(conditionResponse.result);
+        const diet = this.calculateDiet(conditionResponse.result, params.lang);
 
         const result: DashboardDto = {
             conditions: conditionResponse.result.map(condition => {
@@ -69,10 +71,20 @@ export class DashboardController {
         return ServiceResponse.ok(result);
     }
 
-    calculateDiet(conditions: Condition[]) {
+    calculateDiet(conditions: Condition[], lang: ELang = ELang.en) {
         return conditions.reduce((diet, condition) => {
             if (condition.conditionPreset) {
-                for (const el of condition.conditionPreset.recommended) {
+                const recommended = lang === ELang.en ?
+                    condition.conditionPreset.recommended :
+                    condition.conditionPreset[`recommended_${lang}`] ?? [];
+                const limited = lang === ELang.en ?
+                    condition.conditionPreset.limited :
+                    condition.conditionPreset[`limited_${lang}`] ?? [];
+                const forbidden = lang === ELang.en ?
+                    condition.conditionPreset.forbidden :
+                    condition.conditionPreset[`forbidden_${lang}`] ?? [];
+
+                for (const el of recommended) {
                     if (diet.forbidden.has(el)) {
                         continue;
                     }
@@ -84,7 +96,7 @@ export class DashboardController {
                     diet.recommended.add(el);
                 }
 
-                for (const el of condition.conditionPreset.limited) {
+                for (const el of limited) {
                     if (diet.forbidden.has(el)) {
                         continue;
                     }
@@ -96,7 +108,7 @@ export class DashboardController {
                     diet.limited.add(el);
                 }
 
-                for (const el of condition.conditionPreset.forbidden) {
+                for (const el of forbidden) {
                     if (diet.recommended.has(el)) {
                         diet.recommended.delete(el);
                     }

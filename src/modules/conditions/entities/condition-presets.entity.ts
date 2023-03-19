@@ -20,6 +20,9 @@ export class ConditionPreset {
     @Column()
     public name!: string;
 
+    @Column({ nullable: true })
+    public name_ru!: string;
+
     @OneToMany(() => Condition, (condition: Condition) => condition.conditionPreset)
     public conditions!: Condition[];
 
@@ -37,6 +40,15 @@ export class ConditionPreset {
 
     @Column('simple-array', { array: true })
     public forbidden!: string[];
+
+    @Column('simple-array', { array: true, nullable: true })
+    public recommended_ru!: string[];
+
+    @Column('simple-array', { array: true, nullable: true })
+    public limited_ru!: string[];
+
+    @Column('simple-array', { array: true, nullable: true })
+    public forbidden_ru!: string[];
 
     @CreateDateColumn({ type: 'timestamptz', default: () => 'NOW()' })
     public createdAt!: Date;

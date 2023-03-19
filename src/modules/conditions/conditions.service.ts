@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { ELang } from '../../common/helpers/lang';
 import { ServiceResponse, TResult } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { MeasurementsService } from '../measurements/measurements.service';
@@ -255,18 +256,23 @@ export class ConditionsService {
         return ServiceResponse.ok(conditions);
     }
 
-    async getPresets() {
-        const presets = await SafeCall.call<typeof this.conditionPresetsRepository.find>(
+    async getPresets(lang = ELang.en) {
+        let presets = await SafeCall.call<typeof this.conditionPresetsRepository.find>(
             this.conditionPresetsRepository.find());
 
         if (presets instanceof Error) {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_CONDITION_PRESETS);
         }
 
-        return ServiceResponse.ok(presets.map(preset => ({
-            id: preset.id,
-            name: preset.name,
-        })));
+        if (lang !== ELang.en) {
+            presets = presets.filter(preset => preset[`name_${lang}`]);
+        }
+
+        return ServiceResponse.ok(presets
+            .map(preset => ({
+                id: preset.id,
+                name: lang === ELang.en ? preset.name : preset[`name_${lang}`],
+            })));
     }
 }
 

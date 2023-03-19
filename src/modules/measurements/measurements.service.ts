@@ -1,10 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
+import { ELang } from '../../common/helpers/lang';
 import { ServiceResponse, TResult } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { ConditionsService } from '../conditions/conditions.service';
 import { MeasurementDto } from './dto/measurement.dto';
+import { MeasurementPreset } from './entities/measurement-presets.entity';
+import { Measurement } from './entities/measurements.entity';
 import { MeasurementPresetsRepository } from './repositories/measurement-presets.repository';
 import { MeasurementValuesRepository } from './repositories/measurement-values.repository';
 import { MeasurementsRepository } from './repositories/measurements.repository';
@@ -135,8 +138,8 @@ export class MeasurementsService {
         }));
     }
 
-    async getPresets({ userId, conditionPresetId, conditionId }: IGetPresetsParams) {
-        let presets: IMeasurement[] = [];
+    async getPresets({ userId, conditionPresetId, conditionId, lang = ELang.en }: IGetPresetsParams) {
+        let presets: MeasurementPreset[] = [];
         const userTrackingMeasurements = new Set();
 
         if (conditionId) {
@@ -179,6 +182,10 @@ export class MeasurementsService {
             return ServiceResponse.fail(ServiceResponse.CODES.FAIL_GET_MEASUREMENTS);
         }
 
+        if (lang !== ELang.en) {
+            presets = presets.filter(p => p[`name_${lang}`]);
+        }
+
         return ServiceResponse.ok({
             tracking: userMeasurements.map(measurement => {
                 return {
@@ -189,15 +196,17 @@ export class MeasurementsService {
                     isTracking: userTrackingMeasurements.has(measurement.id),
                 } satisfies IMeasurement;
             }),
-            presets: presets.filter(p => userMeasurements.findIndex(m => m.name === p.name) < 0).map(preset => {
-                return {
-                    id: preset.id,
-                    name: preset.name,
-                    unit: preset.unit,
-                    displayTime: preset.displayTime,
-                    isTracking: false,
-                } satisfies IMeasurement;
-            }),
+            presets: presets
+                .filter(p => userMeasurements.findIndex(m => m.name === p.name) < 0)
+                .map(p => {
+                    return {
+                        id: p.id,
+                        name: lang === ELang.en ? p.name : p[`name_${lang}`],
+                        unit: lang === ELang.en ? p.unit : p[`unit_${lang}`],
+                        displayTime: p.displayTime,
+                        isTracking: false,
+                    } satisfies IMeasurement;
+                }),
         });
     }
 
@@ -268,6 +277,8 @@ interface IGetPresetsParams {
     userId: string;
     conditionPresetId?: string;
     conditionId?: string;
+
+    lang?: ELang;
 }
 
 interface IGetAllParams {
