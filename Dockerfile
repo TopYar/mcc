@@ -13,6 +13,6 @@ COPY --from=appbuild /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=appbuild /usr/src/app/package.json /usr/src/app/package.json
 ENV PORT=${PORT}
 EXPOSE ${PORT}
-RUN npm install pm2 -g
 #RUN pm2 start npm -- start:prod
-#CMD ["pm2", "start npm -- start:prod"]
+CMD ["npm", "run", "migrations:run:prod"]
+CMD ["npm", "run", "start:prod"]
