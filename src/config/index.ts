@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 export default {
     project: process.env.MCC_PROJECT_NAME,
-    buildId: process.env.BUILD_ID,
+    logsName: process.env.MCC_LOGS_NAME,
     baseUrl: process.env.MCC_BASE_URL,
     server: {
         port: process.env.MCC_PORT || 3000,

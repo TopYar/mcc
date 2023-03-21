@@ -52,7 +52,7 @@ const mainLogger = winston.createLogger({
             ),
         }),
         new winston.transports.File({
-            filename: `./logs/json/${config.project}${config.buildId ? '-' + config.buildId : ''}.log`,
+            filename: `./logs/json/${config.logsName}.log`,
             format: combine(
                 timestamp(),
                 json(),
@@ -63,7 +63,7 @@ const mainLogger = winston.createLogger({
             maxsize: 5 * 1024 * 1024,
         }),
         new winston.transports.File({
-            filename: `./logs/colors/${config.project}${config.buildId ? '-' + config.buildId : ''}.log`,
+            filename: `./logs/colors/${config.logsName}.log`,
             format: combine(
                 colorize(),
                 timestamp(),
