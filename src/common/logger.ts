@@ -3,7 +3,7 @@ import path from 'path';
 import winston from 'winston';
 
 import config from '../config';
-const { colorize, combine, timestamp, label, printf } = winston.format;
+const { json, colorize, combine, timestamp, label, printf } = winston.format;
 
 const rootPath = path.resolve(__dirname + '/../');
 
@@ -30,7 +30,7 @@ const loggerConfig = {
     },
 };
 
-const myFormat = printf(({ level, message, label = config.project, timestamp, ...meta }) => {
+const colorizedFormat = printf(({ level, message, label = config.project, timestamp, ...meta }) => {
     if (label) {
         label = colors.cyan('[' + label + ']');
     }
@@ -43,12 +43,38 @@ winston.addColors(loggerConfig.colors);
 const mainLogger = winston.createLogger({
     levels: loggerConfig.levels,
     level: 'info',
-    format: combine(
-        colorize(),
-        timestamp(),
-        myFormat,
-    ),
-    transports: [new winston.transports.Console()],
+    transports: [
+        new winston.transports.Console({
+            format: combine(
+                colorize(),
+                timestamp(),
+                colorizedFormat,
+            ),
+        }),
+        new winston.transports.File({
+            filename: `./logs/json/${config.project}${config.buildId ? '-' + config.buildId : ''}.log`,
+            format: combine(
+                timestamp(),
+                json(),
+            ),
+            rotationFormat: function() {
+                return getFormattedDate();
+            },
+            maxsize: 1000, //5 * 1024 * 1024,
+        }),
+        new winston.transports.File({
+            filename: `./logs/colors/${config.project}${config.buildId ? '-' + config.buildId : ''}.log`,
+            format: combine(
+                colorize(),
+                timestamp(),
+                colorizedFormat,
+            ),
+            rotationFormat: function() {
+                return getFormattedDate();
+            },
+            maxsize: 1000, //5 * 1024 * 1024,
+        }),
+    ],
 });
 
 export function createLogger(dir: string) {
@@ -58,4 +84,18 @@ export function createLogger(dir: string) {
             .replace(/\.([tj])s/, '')
             .split('/').join(':'),
     });
+}
+
+function getFormattedDate() {
+    const temp = new Date();
+
+    return padStr(temp.getFullYear()) +
+        padStr(1 + temp.getMonth()) +
+        padStr(temp.getDate()) +
+        padStr(temp.getHours()) +
+        padStr(temp.getMinutes()) +
+        padStr(temp.getSeconds());
+}
+function padStr(i: number) {
+    return (i < 10) ? '0' + i : '' + i;
 }

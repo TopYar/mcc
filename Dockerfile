@@ -14,5 +14,6 @@ COPY --from=appbuild /usr/src/app/package.json /usr/src/app/package.json
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 #RUN pm2 start npm -- start:prod
+RUN mkdir "logs"
 CMD ["npm", "run", "migrations:run:prod"]
 CMD ["npm", "run", "start:prod"]
