@@ -60,7 +60,7 @@ const mainLogger = winston.createLogger({
             rotationFormat: function() {
                 return getFormattedDate();
             },
-            maxsize: 1000, //5 * 1024 * 1024,
+            maxsize: 5 * 1024 * 1024,
         }),
         new winston.transports.File({
             filename: `./logs/colors/${config.project}${config.buildId ? '-' + config.buildId : ''}.log`,
@@ -72,7 +72,7 @@ const mainLogger = winston.createLogger({
             rotationFormat: function() {
                 return getFormattedDate();
             },
-            maxsize: 1000, //5 * 1024 * 1024,
+            maxsize: 5 * 1024 * 1024,
         }),
     ],
 });
@@ -89,11 +89,11 @@ export function createLogger(dir: string) {
 function getFormattedDate() {
     const temp = new Date();
 
-    return padStr(temp.getFullYear()) +
-        padStr(1 + temp.getMonth()) +
-        padStr(temp.getDate()) +
-        padStr(temp.getHours()) +
-        padStr(temp.getMinutes()) +
+    return padStr(temp.getFullYear()) + '-' +
+        padStr(1 + temp.getMonth()) + '-' +
+        padStr(temp.getDate()) + '-' +
+        padStr(temp.getHours()) + '-' +
+        padStr(temp.getMinutes()) + '-' +
         padStr(temp.getSeconds());
 }
 function padStr(i: number) {
