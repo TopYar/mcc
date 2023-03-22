@@ -1,5 +1,5 @@
 import { OptionalNotEmptyString } from '../../../common/helpers/validator-decorators';
-import { VString } from '../../../utils/validator';
+import { VBoolean, VString } from '../../../utils/validator';
 
 export class UpdateMeasurementDto {
     @VString({ empty: false })
@@ -8,6 +8,6 @@ export class UpdateMeasurementDto {
     name?: string;
     @OptionalNotEmptyString
     unit?: string;
-    @OptionalNotEmptyString
+    @VBoolean({ optional: true })
     displayTime?: boolean;
 }

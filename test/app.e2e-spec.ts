@@ -82,7 +82,7 @@ describe('AppController (e2e)', () => {
             });
 
         expect(response.body.success).toBe(false);
-        expect(response.body.error.code).toBe(ServiceResponse.CODES.ERROR_CONFIRMATION_CODE_IS_INVALID.code);
+        expect(response.body.error.code).toBe(ServiceResponse.CODES.VALIDATION_ERROR.code);
     });
 
     it('Login', async () => {
