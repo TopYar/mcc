@@ -1,11 +1,12 @@
 import {
     Body, Controller, forwardRef,
-    Get, Inject, Param, Post, Put, Query,
+    Get, Inject, Post, Put, Query,
     Req, UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { ELang } from '../../common/helpers/lang';
+import { IdParams } from '../../common/params/id.params';
+import { LangParams } from '../../common/params/lang.params';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -24,7 +25,7 @@ export class ConditionsController {
         private readonly measurementsService: MeasurementsService) {}
 
     @Get('presets')
-    async getPresets(@Req() req: Request, @Query() params: { lang?: ELang; }) {
+    async getPresets(@Req() req: Request, @Query() params: LangParams) {
         const presets = await SafeCall.call<typeof this.conditionsService.getPresets>(
             this.conditionsService.getPresets(params.lang),
         );
@@ -38,7 +39,7 @@ export class ConditionsController {
 
     @UseGuards(AuthGuard)
     @Get()
-    async getCondition(@Query() params: { id: string; }, @Req() req: Request) {
+    async getCondition(@Query() params: IdParams, @Req() req: Request) {
         const conditionResponse = await SafeCall.call<typeof this.conditionsService.getOne>(
             this.conditionsService.getOne({ id: params.id, userId: req.session.userId }),
         );

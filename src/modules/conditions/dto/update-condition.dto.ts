@@ -1,8 +1,13 @@
-export interface UpdateConditionDto {
-    id: string;
+import { OptionalNotEmptyString } from '../../../common/helpers/validator-decorators';
+import { NestedObject, VString } from '../../../utils/validator';
+import { MeasurementsDto } from './measurements.dto';
+
+export class UpdateConditionDto {
+    @VString({ empty: false })
+    id!: string;
+    @OptionalNotEmptyString
     name?: string;
-    measurements?: {
-        tracking?: string[];
-        presets?: string[];
-    };
+
+    @NestedObject({ optional: true })
+    measurements?: MeasurementsDto;
 }

@@ -2,10 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import session from 'express-session';
 
 import { AppModule } from './app.module';
+import { FastestValidatorExceptionFilter } from './common/filters/fastest-validator-exception.filter';
+import { GlobalErrorFilter } from './common/filters/global-error.filter';
 import { ServiceExceptionFilter } from './common/filters/service-exception.filter';
 import { SessionContext } from './common/helpers/session-context';
 import { store } from './common/redis';
 import config from './config';
+import { FastestValidatorPipe } from './utils/validator';
 
 
 // Augment express-session with a custom SessionData object
@@ -35,7 +38,14 @@ async function bootstrap() {
     const port = config.server.port;
 
     app.use(sessionInstance);
+
+    app.useGlobalFilters(new GlobalErrorFilter());
     app.useGlobalFilters(new ServiceExceptionFilter());
+    app.useGlobalPipes(new FastestValidatorPipe());
+    app.useGlobalFilters(new FastestValidatorExceptionFilter({
+        showStack: false,
+    }));
+
     await app.listen(port);
 }
 bootstrap();

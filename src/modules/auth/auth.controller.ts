@@ -58,8 +58,6 @@ export class AuthController {
         return ServiceResponse.ok({ token });
     }
 
-
-
     @CheckJwt(EJwtType.CONFIRMATION)
     @Get('resend-code')
     async resendCode(@Req() req: Request) {

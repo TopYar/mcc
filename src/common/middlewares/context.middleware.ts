@@ -14,7 +14,7 @@ export class ContextMiddleware implements NestMiddleware {
 
         const logger = mainLogger.child({ traceId: req.ctx.traceId });
 
-        logger.info(`Incoming http request: ${req.ctx.data.url}`, { body: req.body });
+        logger.info(`Incoming http request: ${req.method} ${req.ctx.data.url}`, { body: req.body });
 
         next();
     }

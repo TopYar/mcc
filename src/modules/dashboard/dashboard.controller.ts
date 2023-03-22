@@ -5,6 +5,7 @@ import {
 import { Request } from 'express';
 
 import { ELang } from '../../common/helpers/lang';
+import { LangParams } from '../../common/params/lang.params';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -19,7 +20,7 @@ export class DashboardController {
 
     @UseGuards(AuthGuard)
     @Get()
-    async getDashboard(@Req() req: Request, @Query() params: { lang?: ELang; }) {
+    async getDashboard(@Req() req: Request, @Query() params: LangParams) {
         const conditionResponse = await SafeCall.call<typeof this.conditionsService.getAll>(
             this.conditionsService.getAll({
                 userId: req.session.userId!,

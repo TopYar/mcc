@@ -239,7 +239,7 @@ export const ServiceResponse = {
             result: result,
         };
     },
-    fail(code: { code: number; msg: string; }, result?: any): IFailResult {
+    fail(code: { code: number; msg: string;[k: string]: any; }, result?: any): IFailResult {
         return {
             success: false,
             result: result ?? undefined,

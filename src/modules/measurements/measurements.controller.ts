@@ -5,7 +5,9 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { ELang } from '../../common/helpers/lang';
+import { OptionalNotEmptyString } from '../../common/helpers/validator-decorators';
+import { IdOptionalParams, IdParams } from '../../common/params/id.params';
+import { LangParams } from '../../common/params/lang.params';
 import { ServiceResponse } from '../../common/ServiceResponse';
 import { SafeCall } from '../../utils/safeCall';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -14,15 +16,20 @@ import { CreateMeasurementDto } from './dto/create-measurement.dto';
 import { UpdateMeasurementDto } from './dto/update-measurement.dto';
 import { MeasurementsService } from './measurements.service';
 
+class GetPresetsParams extends LangParams {
+    @OptionalNotEmptyString
+    conditionPresetId?: string;
+    @OptionalNotEmptyString
+    conditionId?: string;
+}
 
 @Controller('/measurements')
 export class MeasurementsController {
     constructor(private readonly measurementsService: MeasurementsService) {}
 
-
     @UseGuards(AuthGuard)
     @Get('available')
-    async getPresets(@Query() params: { conditionPresetId?: string, conditionId?: string, lang?: ELang; }, @Req() req: Request) {
+    async getPresets(@Query() params: GetPresetsParams, @Req() req: Request) {
         const presets = await SafeCall.call<typeof this.measurementsService.getPresets>(
             this.measurementsService.getPresets({
                 userId: req.session.userId!,
@@ -39,7 +46,7 @@ export class MeasurementsController {
 
     @UseGuards(AuthGuard)
     @Get()
-    async getAll(@Query() params: { id?: string; }, @Req() req: Request) {
+    async getAll(@Query() params: IdOptionalParams, @Req() req: Request) {
         let response;
 
         if (params.id) {
@@ -101,7 +108,7 @@ export class MeasurementsController {
 
     @UseGuards(AuthGuard)
     @Delete()
-    async deleteMeasurement(@Query() params: { id: string; }, @Req() req: Request) {
+    async deleteMeasurement(@Query() params: IdParams, @Req() req: Request) {
         const response = await SafeCall.call<typeof this.measurementsService.deleteMeasurement>(
             this.measurementsService.deleteMeasurement({ id: params.id, userId: req.session.userId! }),
         );

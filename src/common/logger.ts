@@ -35,7 +35,7 @@ const colorizedFormat = printf(({ level, message, label = config.project, timest
         label = colors.cyan('[' + label + ']');
     }
 
-    return `${timestamp} ${level}\t${label}\t${message} ${colors.gray(JSON.stringify(meta))}`;
+    return `${new Date(timestamp).toLocaleString('en-GB')} ${level} ${label} ${message} ${colors.gray(JSON.stringify(meta))}`;
 });
 
 winston.addColors(loggerConfig.colors);

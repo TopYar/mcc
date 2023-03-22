@@ -6,13 +6,18 @@ import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
 import { aesDecrypt } from '../../utils/cryptox';
 import { IJwtPayload } from '../helpers/jwt';
+import { createLogger } from '../logger';
 import { ServiceResponse } from '../ServiceResponse';
+
+const mainLogger = createLogger(__filename);
 
 @Injectable()
 export class JwtSessionMiddleware implements NestMiddleware {
     constructor(private readonly jwtService: JwtService) {
     }
     async use(req: Request, res: Response, next: NextFunction) {
+        const logger = mainLogger.child({ traceId: req.ctx.traceId });
+
         try {
             if (req.headers.authorization || req.headers['jwt']) {
                 const token = req.headers['jwt'] ?? req.headers.authorization!.split(' ')?.[1];
@@ -78,12 +83,16 @@ export class JwtSessionMiddleware implements NestMiddleware {
             }
         } catch (error: any) {
             if (error instanceof TokenExpiredError) {
+                logger.warn('Token was expired. Request rejected');
+
                 return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_INVALID));
             } else if (error instanceof JsonWebTokenError) {
+                logger.warn('Token is invalid. Request rejected');
+
                 return res.send(ServiceResponse.fail(ServiceResponse.CODES.ERROR_JWT_TOKEN_IS_INVALID));
             }
 
-            console.log(error);
+            logger.error('Unexpected error', { error });
 
             return res.send(ServiceResponse.fail(ServiceResponse.CODES.INTERNAL_SERVER_ERROR));
         }
