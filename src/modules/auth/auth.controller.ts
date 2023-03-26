@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import ejs from 'ejs';
 import { Request } from 'express';
@@ -8,6 +8,7 @@ import moment from 'moment';
 import { HtmlPage } from '../../common/decorators/html-template.decorator';
 import { HtmlTemplate } from '../../common/helpers/html-templates';
 import { EJwtType } from '../../common/helpers/jwt';
+import { IdParams } from '../../common/params/id.params';
 import { redisClient } from '../../common/redis';
 // import { Session } from 'express-session';
 import { ServiceResponse } from '../../common/ServiceResponse';
@@ -225,10 +226,10 @@ export class AuthController {
         return response;
     }
 
-    @Post('recover/:id')
-    async setPassword(@Body() body: SetPasswordDto, @Param('id') id: string) {
+    @Post('recover')
+    async setPassword(@Body() body: SetPasswordDto, @Query() params: IdParams) {
         const response = await SafeCall.call<typeof this.authService.setPassword>(
-            this.authService.setPassword(id, body.password),
+            this.authService.setPassword(params.id, body.password),
         );
 
         if (response instanceof Error) {
@@ -239,26 +240,26 @@ export class AuthController {
     }
 
     @HtmlPage(HtmlTemplate.RECOVER)
-    @Get('recover/:id')
-    async recoverPage(@Req() req: Request, @Param('id') id: string) {
-        const params: { [k: string]: any; } = {
+    @Get('recover')
+    async recoverPage(@Req() req: Request, @Query() params: IdParams) {
+        const payload: { [k: string]: any; } = {
             error: null,
             email: null,
         };
 
         const response = await SafeCall.call<typeof this.authService.getRecoverInfo>(
-            this.authService.getRecoverInfo(id),
+            this.authService.getRecoverInfo(params.id),
         );
 
         if (response instanceof Error) {
-            params.error = ServiceResponse.CODES.FAIL_USE_RECOVER_LINK.msg;
+            payload.error = ServiceResponse.CODES.FAIL_USE_RECOVER_LINK.msg;
         } else if (!response.success) {
-            params.error = response.error.msg;
+            payload.error = response.error.msg;
         } else {
-            params.email = response.result;
+            payload.email = response.result;
         }
 
-        return ejs.render(req.ctx.data.html, params);
+        return ejs.render(req.ctx.data.html, payload);
     }
 
     createJwtToken(userId: string, sessionId: string, type: EJwtType, expiresIn?: string) {

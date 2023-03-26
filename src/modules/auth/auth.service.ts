@@ -203,7 +203,7 @@ export class AuthService {
                 template: EmailTemplate.RECOVER,
                 subject: 'Recover your password',
                 params: {
-                    link: config.baseUrl + `/auth/recover/${linkId}`,
+                    link: config.baseUrl + `/auth/recover?id=${linkId}`,
                 },
             }),
         );
